@@ -1,0 +1,7 @@
+.chess-game-side-panel {
+	height: calc(var(--square-size) * 8);
+	width: calc(var(--square-size) * 8);
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+}

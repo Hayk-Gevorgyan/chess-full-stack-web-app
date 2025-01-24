@@ -1,0 +1,8 @@
+.promotion-panel {
+	width: var(--square-size);
+	height: calc(var(--square-size) * 4);
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	background-color: bisque;
+}

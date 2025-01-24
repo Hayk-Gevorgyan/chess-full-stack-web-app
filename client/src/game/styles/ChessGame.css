@@ -1,0 +1,58 @@
+.flipped .chessboard,
+.flipped .number-block,
+.flipped .letter-block,
+.flipped .numbers-panel,
+.flipped .letters-panel,
+.flipped .square-white,
+.flipped .square-black {
+	transform: rotate(180deg);
+}
+
+.chessboard-container {
+	display: flex;
+	flex-direction: row;
+	width: calc(var(--square-size) * 17);
+	height: calc(var(--square-size) * 9);
+}
+
+.board-letter-panel-filler-promotion-panel {
+	position: relative;
+}
+/* 
+.board-and-letter-panel-column {
+	position: absolute;
+} */
+
+.number-letter-panel-filler {
+	width: var(--square-size);
+	height: var(--square-size);
+}
+
+.numbers-panel,
+.letters-panel {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.numbers-panel {
+	flex-direction: column-reverse;
+	width: var(--square-size);
+	height: calc(var(--square-size) * 8);
+}
+
+.letters-panel {
+	flex-direction: row;
+	width: calc(var(--square-size) * 8);
+	height: var(--square-size);
+}
+
+.number-block,
+.letter-block {
+	width: var(--square-size);
+	height: var(--square-size);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}

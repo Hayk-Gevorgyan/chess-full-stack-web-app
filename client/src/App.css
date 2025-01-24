@@ -1,0 +1,31 @@
+:root {
+	--dark-blue: #41505f;
+	--white-square: #f0d9b5;
+	--black-square: #b58863;
+	--square-size: 50px;
+	--selected-square-color: #87ceeb;
+	--valid-move-square-color: #fffacd;
+	--attacked-square-color: #ff6347;
+	--navbar-width: 150px;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+}
+
+/* General container styling */
+.game-page-container,
+.home-page-container,
+.auth-page-container {
+	display: flex; /* Create a horizontal layout */
+	height: 100vh; /* Full viewport height */
+	margin: 0;
+}
+
+.content {
+	margin-left: var(--navbar-width);
+	padding-left: 2rem;
+	width: 90%;
+	overflow-y: auto; /* Allow scrolling if content overflows */
+}

@@ -1,0 +1,12 @@
+.controls-container {
+	width: calc(var(--square-size) * 7);
+	height: calc(var(--square-size));
+	display: flex;
+	align-items: stretch;
+	justify-content: space-between;
+}
+
+.controls-container button {
+	flex: 1;
+	height: 100%;
+}
