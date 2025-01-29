@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import { GameContext, ChessWebSocketMessage } from "../contexts/GameContext"
 import { ChessClientEvent, ChessServerEvent, Color, GameState, Move } from "../../game/types/types"
 import { useAuthContext } from "../hooks/useAuthContext"
-import useGraphQLWS from "../../game/hooks/useGraphQLWS"
+import { useChessGQL } from "../../game/graphql/hooks"
 
 const GAME_UPDATED_SUBSCIPTION_QUERY = `#graphql
 	subscription GameUpdated($id: ID!, $username: String) {
@@ -145,7 +145,7 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	// 	[username]
 	// )
 
-	const { sendMessage, startGraphQLSubscription } = useGraphQLWS()
+	const { sendMessage, startGraphQLSubscription } = useChessGQL()
 
 	useEffect(() => {
 		const unsubscribe = startGraphQLSubscription<GameUpdatedData>(

@@ -1,76 +1,29 @@
 import { useEffect, useCallback, useMemo } from "react"
 import { ChessServerEvent } from "../types/types"
-import { log } from "../../shared/providers/graphqlClient"
+import { log } from "../../shared/utils/helperFunctions"
 import { useAuthContext } from "../../shared/hooks/useAuthContext"
 import { createClient, ClientOptions } from "graphql-ws"
+import {
+	START_GAME_MUTATION,
+	ACCEPT_DRAW_MUTATION,
+	DENY_DRAW_MUTATION,
+	MAKE_MOVE_MUTATION,
+	OFFER_DRAW_MUTATION,
+	RESIGN_MUTATION,
+} from "./queries"
 
-const START_GAME_MUTATION = `#graphql
-  mutation StartGame($username: String!) {
-    startGame(username: $username) {
-      id
-      game {
-        id
-        white
-        black
-        moves {
-          from
-          to
-          promotion
-        }
-        state
-      }
-    }
-  }
-`
-
-const MAKE_MOVE_MUTATION = `#graphql
-  mutation MakeMove($id: ID!, $move: MoveInput!, $username: String!) {
-    makeMove(id: $id, move: $move, username: $username)
-  }
-`
-
-const RESIGN_MUTATION = `#graphql
-  mutation Resign($id: ID!, $username: String!) {
-    resign(id: $id, username: $username)
-  }
-`
-
-const OFFER_DRAW_MUTATION = `#graphql
-  mutation OfferDraw($id: ID!, $username: String!) {
-    offerDraw(id: $id, username: $username)
-  }
-`
-
-const ACCEPT_DRAW_MUTATION = `#graphql
-  mutation AcceptDraw($id: ID!, $username: String!) {
-    acceptDraw(id: $id, username: $username)
-  }
-`
-
-const DENY_DRAW_MUTATION = `#graphql
-  mutation DenyDraw($id: ID!, $username: String!) {
-    denyDraw(id: $id, username: $username)
-  }
-`
-
-export default function useGraphQLWS() {
+export function useChessGQL() {
 	const { serverUrl } = useAuthContext()
 
-	// Create GraphQL WS client
 	const client = useMemo(() => {
 		if (!serverUrl) return null
 		const options: ClientOptions = {
 			url: `${serverUrl}/graphql`,
-			webSocketImpl: WebSocket, // Ensure this is consistent across renders
-			// connectionParams: {
-			// 	// Example: Add auth headers or other params here
-			// 	Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-			// },
+			webSocketImpl: WebSocket,
 		}
 		return createClient(options)
 	}, [serverUrl])
 
-	// Function to start a subscription
 	const startGraphQLSubscription = useCallback(
 		<T>(query: string, variables: Record<string, any>, onData: (data: T) => void) => {
 			if (!client) {
@@ -94,12 +47,11 @@ export default function useGraphQLWS() {
 				}
 			)
 
-			return unsubscribe // Return the unsubscribe function for manual cleanup if needed
+			return unsubscribe
 		},
 		[client]
 	)
 
-	// Manage subscription lifecycle with useEffect
 	useEffect(() => {
 		if (!client) return
 
