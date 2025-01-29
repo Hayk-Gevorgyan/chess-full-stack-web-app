@@ -97,19 +97,16 @@ export default class ChessWebSocketServer {
 			return
 		}
 		console.log(`${username} starting a game`)
-		const gameIndex = this.gameModel.addWaitingPlayer(username)
+		const { id, game } = this.gameModel.handleStartGame(username)
 
-		if (gameIndex) {
+		if (!game) {
 			this.sendWaiting(ws, username)
 			console.log(`user ${username} is waiting for an opponent`)
 		} else {
-			const game = this.gameModel.findActiveGameByUsername(username)
-			if (game) {
-				const sessionId = game.id
-				const opponentUsername = game.white === username ? game.black : game.white
-				this.createSession(sessionId, username, opponentUsername)
-				this.sendToSession(sessionId, ChessClientEvent.GAME_START, game)
-			}
+			const sessionId = game.id
+			const opponentUsername = game.white === username ? game.black : game.white
+			this.createSession(sessionId, username, opponentUsername)
+			this.sendToSession(sessionId, ChessClientEvent.GAME_START, game)
 		}
 	}
 	private handleMakeMove(ws: WS, data: Move): void {

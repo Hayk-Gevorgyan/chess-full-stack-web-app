@@ -60,7 +60,7 @@ export function getPieceColor(piece: string | null | undefined): PlayerColor {
 }
 
 export function generateId(): string {
-	return Math.random().toString(36).substr(2, 9) // Generates a string of 9 characters
+	return Math.random().toString(36).substr(2, 9)
 }
 
 export function logFunctionCall(functionName: string, args: any[]) {
