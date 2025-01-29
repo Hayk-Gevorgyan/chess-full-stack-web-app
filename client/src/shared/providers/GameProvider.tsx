@@ -2,35 +2,9 @@ import React, { useCallback, useEffect, useState } from "react"
 import { GameContext, ChessWebSocketMessage } from "../contexts/GameContext"
 import { ChessClientEvent, ChessServerEvent, Color, GameState, Move } from "../../game/types/types"
 import { useAuthContext } from "../hooks/useAuthContext"
-import { useChessGQL } from "../../game/graphql/hooks"
+import { useChessGQL, GameUpdatedData } from "../../game/graphql/hooks"
+import { GAME_UPDATED_SUBSCIPTION_QUERY } from "../../game/graphql/queries"
 
-const GAME_UPDATED_SUBSCIPTION_QUERY = `#graphql
-	subscription GameUpdated($id: ID!, $username: String) {
-		gameUpdated(id: $id, username: $username) {
-			id
-			white
-			black
-			state
-			moves {
-				from
-				to
-				promotion
-			}
-			drawOffer
-		}
-	}
-`
-
-interface GameUpdatedData {
-	gameUpdated: {
-		id: string
-		white: string
-		black: string
-		state: GameState
-		moves: Move[]
-		drawOffer: string | null | undefined
-	}
-}
 const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	const { username } = useAuthContext()
 	const [id, setId] = useState<string | undefined>()

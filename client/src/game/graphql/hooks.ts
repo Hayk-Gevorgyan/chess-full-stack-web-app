@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useMemo } from "react"
-import { ChessServerEvent } from "../types/types"
+import { ChessServerEvent, GameState, Move } from "../types/types"
 import { log } from "../../shared/utils/helperFunctions"
 import { useAuthContext } from "../../shared/hooks/useAuthContext"
 import { createClient, ClientOptions } from "graphql-ws"
@@ -11,6 +11,17 @@ import {
 	OFFER_DRAW_MUTATION,
 	RESIGN_MUTATION,
 } from "./queries"
+
+export interface GameUpdatedData {
+	gameUpdated: {
+		id: string
+		white: string
+		black: string
+		state: GameState
+		moves: Move[]
+		drawOffer: string | null | undefined
+	}
+}
 
 export function useChessGQL() {
 	const { serverUrl } = useAuthContext()

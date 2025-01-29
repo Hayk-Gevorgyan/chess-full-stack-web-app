@@ -46,3 +46,20 @@ export const DENY_DRAW_MUTATION = `#graphql
 	denyDraw(id: $id, username: $username)
   }
 `
+
+export const GAME_UPDATED_SUBSCIPTION_QUERY = `#graphql
+	subscription GameUpdated($id: ID!, $username: String) {
+		gameUpdated(id: $id, username: $username) {
+			id
+			white
+			black
+			state
+			moves {
+				from
+				to
+				promotion
+			}
+			drawOffer
+		}
+	}
+`
