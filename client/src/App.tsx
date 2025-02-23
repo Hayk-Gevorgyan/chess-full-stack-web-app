@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
-import AuthPage from "./pages/AuthPage"
-import GamePage from "./pages/GamePage"
+import AuthPage from "./auth/page/AuthPage"
+import ChessGamePage from "./chessGame/page/ChessGamePage"
 import NotFound from "./pages/NotFound"
 import "./App.css"
 import AuthProvider from "./shared/providers/AuthProvider"
@@ -11,19 +11,16 @@ export default function App() {
 	return (
 		<BrowserRouter>
 			<AuthProvider>
-				<Routes>
-					<Route path="/" element={<HomePage />} />
-					<Route path="/auth" element={<AuthPage />} />
-					<Route
-						path="/game"
-						element={
-							<GameProvider>
-								<GamePage />
-							</GameProvider>
-						}
-					/>
-					<Route path="*" element={<NotFound />} />
-				</Routes>
+				<GameProvider>
+					<Routes>
+						<Route path="/auth" element={<AuthPage />} />
+
+						<Route path="/" element={<HomePage />} />
+						<Route path="/game" element={<ChessGamePage />} />
+
+						<Route path="*" element={<NotFound />} />
+					</Routes>
+				</GameProvider>
 			</AuthProvider>
 		</BrowserRouter>
 	)

@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { AuthContext } from "../contexts/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
+import useAuthMutations from "../../apollo/user/hooks/useAuthMutations"
+import { useLocalStorage } from "../hooks/useLocalStorage"
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const [username, setUsername] = useState<string | null>(null)
@@ -8,100 +10,126 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const [signupError, setSignupError] = useState<string | null>(null)
 	const [logoutError, setLogoutError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
+	const { setItem: setToken, removeItem: removeToken } = useLocalStorage("token")
 	const serverUrl = "http://localhost:56789"
 	const navigate = useNavigate()
+	const location = useLocation()
 
-	useEffect(() => {
-		if (!username) {
-			navigate("/auth")
-		}
-	}, [username, navigate])
+	const { loginCallback, signupCallback, logoutCallback, reconnectCallback } = useAuthMutations()
 
-	const logIn = async (username: string, password: string): Promise<void> => {
-		setLoginError(null)
+	const reconnect = useCallback(async () => {
+		setUsername(null)
 		setSuccess(null)
 
-		try {
-			const response = await fetch(`${serverUrl}/login`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username, password }),
-			})
+		const response = await reconnectCallback()
 
-			if (!response.ok) {
-				const errorMessage = await response.text()
-				throw new Error(errorMessage || "Login failed.")
+		const data = response.data
+
+		if (data) {
+			const { error, message, username } = data.reconnect
+
+			if (error) {
+				console.log(error)
+				removeToken()
+				return
 			}
+			if (message) {
+				console.log({ message })
+			}
+			if (username) {
+				setUsername(username)
+				setSuccess(message ? message : "Reconnected Successfully")
+			}
+		}
+	}, [reconnectCallback, removeToken])
 
-			const res = await response.json()
-			if (res.user && res.user.username) {
-				setUsername(res.user.username)
-				setSuccess("Login successful!")
+	useEffect(() => {
+		reconnect()
+	}, [reconnect])
+
+	useEffect(() => {
+		if (username) {
+			if (location.pathname === "/auth") {
 				navigate("/")
-			} else {
-				throw new Error(res.message || "Unexpected server response.")
 			}
-		} catch (err) {
-			setLoginError(err instanceof Error ? err.message : "A network error occurred. Please try again.")
+		} else {
+			navigate("/auth")
+		}
+	}, [username, navigate, location.pathname])
+
+	const logIn = async (username: string, password: string) => {
+		setUsername(null)
+		setSuccess(null)
+		removeToken()
+
+		const response = await loginCallback({ variables: { username, password } })
+
+		const data = response.data
+
+		if (data) {
+			const { error, message, username, token } = data.login
+			if (error) {
+				setLoginError(error)
+				return
+			}
+			if (username && token) {
+				setUsername(username)
+				setSuccess(message ? message : "Login Successful")
+				setToken(token)
+			}
 		}
 	}
 
-	const signUp = async (username: string, password: string, passwordRepeat: string): Promise<void> => {
-		setSignupError(null)
+	const signUp = async (username: string, password: string) => {
+		setUsername(null)
 		setSuccess(null)
+		removeToken()
 
-		if (password !== passwordRepeat) {
-			setSignupError("Passwords do not match.")
-			return
-		}
+		const response = await signupCallback({ variables: { username, password } })
 
-		try {
-			const response = await fetch(`${serverUrl}/signup`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username, password }),
-			})
+		const data = response.data
 
-			if (!response.ok) {
-				const errorMessage = await response.text()
-				throw new Error(errorMessage || "Signup failed.")
+		if (data) {
+			const { error, message, username, token } = data.signup
+			if (error) {
+				console.log(error)
+				setSignupError(error)
+				return
 			}
-
-			const res = await response.json()
-			if (res.user && res.user.username) {
-				setUsername(res.user.username)
-				setSuccess("Signup successful! You are now logged in.")
-				navigate("/")
-			} else {
-				throw new Error(res.message || "Unexpected server response.")
+			if (username && token) {
+				setUsername(username)
+				setSuccess(message ? message : "Signup Successful")
+				setToken(token)
 			}
-		} catch (err) {
-			setSignupError(err instanceof Error ? err.message : "A network error occurred. Please try again.")
 		}
 	}
 
 	const logOut = async (): Promise<void> => {
+		console.log("logout called")
 		setLoginError(null)
 		setSignupError(null)
 		setSuccess(null)
+		removeToken()
 
-		try {
-			const response = await fetch(`${serverUrl}/logout`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username }),
-			})
+		const response = await logoutCallback()
 
-			if (!response.ok) {
-				const errorMessage = await response.text()
-				throw new Error(errorMessage || "Logout failed.")
+		const data = response.data
+
+		if (data) {
+			console.log(data)
+			const { error, message } = data.logout
+			if (error) {
+				setLogoutError(error)
 			}
-
-			setUsername(null)
-			setSuccess("Logout successful!")
-		} catch (err) {
-			setLogoutError(err instanceof Error ? err.message : "A network error occurred. Please try again.")
+			if (message) {
+				setSuccess(message)
+			}
 		}
+		console.log("logged out")
+		navigate("/auth")
+		setUsername(null)
+		removeToken()
+		console.log("Logged out successfully")
 	}
 
 	return (

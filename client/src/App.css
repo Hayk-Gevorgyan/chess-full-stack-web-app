@@ -1,12 +1,21 @@
 :root {
-	--dark-blue: #41505f;
+	--primary-color: #41505f;
+	--secondary-color: #2e3a47;
+	--deep-blue: #0056b3;
+	--light-grey: #e3e6e8;
 	--white-square: #f0d9b5;
 	--black-square: #b58863;
 	--square-size: 50px;
 	--selected-square-color: #87ceeb;
-	--valid-move-square-color: #fffacd;
+	--valid-move-square-color: rgb(172, 248, 162);
 	--attacked-square-color: #ff6347;
 	--navbar-width: 150px;
+}
+
+@media (min-width: 1024px) and (min-height: 768px) {
+	:root {
+		--square-size: 60px;
+	}
 }
 
 body {
@@ -14,18 +23,100 @@ body {
 	padding: 0;
 }
 
-/* General container styling */
+#root {
+	background-color: var(--secondary-color);
+}
+
 .game-page-container,
 .home-page-container,
 .auth-page-container {
-	display: flex; /* Create a horizontal layout */
-	height: 100vh; /* Full viewport height */
+	display: flex;
+	height: 100vh;
 	margin: 0;
 }
 
 .content {
 	margin-left: var(--navbar-width);
 	padding-left: 2rem;
-	width: 90%;
-	overflow-y: auto; /* Allow scrolling if content overflows */
+	width: 100%;
+	overflow-y: auto;
+}
+
+.navbar {
+	position: fixed;
+	width: var(--navbar-width);
+	height: 100%;
+	background-color: var(--primary-color);
+	color: white;
+	display: flex;
+	flex-direction: column;
+	padding: 1rem;
+	box-shadow: 2px 0 5px rgba(126, 104, 104, 0.1), -2px 0 5px rgba(0, 0, 0, 0.2);
+	z-index: 1000;
+}
+
+.navbar nav {
+	display: flex;
+	flex-direction: column;
+}
+
+.navbar a {
+	margin: 0.5rem;
+	padding: 0.5rem;
+	text-align: center;
+	border: none;
+	border-radius: 10%;
+	text-decoration: none;
+	color: var(--light-grey);
+	transition: background-color 0.3s ease;
+}
+
+.common-btn {
+	box-shadow: 0 0 0.5rem black;
+	margin: 0.5rem;
+	padding: 0.5rem;
+	text-align: center;
+	border: none;
+	border-radius: 0.5rem;
+	text-decoration: none;
+	background-color: var(--primary-color);
+	color: var(--light-grey);
+	transition: background-color 0.3s ease;
+	transition: box-shadow 0.3s ease;
+}
+
+.navbar a:hover,
+.common-btn:hover {
+	background-color: var(--deep-blue);
+	cursor: pointer;
+	box-shadow: none;
+}
+
+header {
+	position: sticky;
+	top: 0;
+	height: 10%;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	background-color: var(--primary-color);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	color: var(--light-grey);
+	z-index: 1000;
+}
+
+@media (max-width: 768px) {
+	.navbar {
+		display: none;
+	}
+
+	.content {
+		margin-left: 0;
+		padding-left: 0;
+	}
+
+	header {
+		position: initial;
+	}
 }

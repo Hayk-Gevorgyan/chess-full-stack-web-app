@@ -1,0 +1,8 @@
+client/node_modules/
+server/node_modules/
+server/.env
+client/.env
+test-client/
+test-server/
+chess-wss-arch.tldr
+gitignore

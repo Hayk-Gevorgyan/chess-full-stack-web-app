@@ -1,13 +1,20 @@
-import createExpressApp from "./src/app"
+import express from "express"
+import cors from "cors"
 import http from "http"
-import ChessWebSocketServer from "./src/chessws/ChessWebSocketServer"
 import dotenv from "dotenv"
+import connectMongoDb from "./src/mongoClient/mogoClient"
+
 import ChessGraphQLWSServer from "./src/chessGraphQLws/ChessGraphQLWSServer"
+import UserModel from "./src/models/UserModel"
+import GameModel from "./src/models/GameModel"
+import AuthController from "./src/chessGraphQLws/AuthController"
+import GameController from "./src/chessGraphQLws/GameController"
 
 dotenv.config()
-const app = createExpressApp()
-const PORT = process.env.SERVER_PORT || 56789
 
+const app = express()
+app.use([express.json(), cors({ origin: "*" })])
+const PORT = process.env.SERVER_PORT || 4000
 const server = http.createServer(app)
 
 server.listen(PORT, () => {
@@ -19,11 +26,41 @@ server.listen(PORT, () => {
 	}
 })
 
+let authController: AuthController
+let gameController: GameController
+
+async function init() {
+	const db = await connectMongoDb()
+	if (!db) {
+		console.error("Failed to connect to MongoDB. Exiting...")
+		process.exit(1)
+	}
+
+	// Instantiate models
+	const userModel = new UserModel(db)
+	const gameModel = new GameModel(db)
+
+	// Instantiate controllers
+	authController = new AuthController(userModel)
+	gameController = new GameController(gameModel)
+
+	// Start GraphQL WebSocket Server
+	const gqls = new ChessGraphQLWSServer(authController, gameController)
+	gqls.connect("/subscriptions", server)
+	gqls.connectApolloServer(app)
+}
+
+init().catch(console.error)
+
+// Export controllers for resolvers
+export { authController, gameController }
 //ChessGraphQLWSServer
-const gqls = new ChessGraphQLWSServer()
-gqls.connect("/graphql", server)
-gqls.connectApolloServer(app)
+//uncomment to use chess graphql server
+// const gqls = new ChessGraphQLWSServer(db)
+// gqls.connect("/subscriptions", server)
+// gqls.connectApolloServer(app)
 
 //ChessWebSocketServer
+//uncomment to use chess web socket server
 // const wss = new ChessWebSocketServer()
 // wss.connect(server)

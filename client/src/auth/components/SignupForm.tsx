@@ -1,8 +1,7 @@
 import React, { useState } from "react"
 import { useAuthContext } from "../../shared/hooks/useAuthContext"
-import "../styles/SignupForm.css"
 
-const SignupForm: React.FC = () => {
+const SignupForm = ({ toggleAuthMode }: { toggleAuthMode: () => void }) => {
 	const [username, setUsername] = useState("")
 	const [password, setPassword] = useState("")
 	const [passwordRepeat, setPasswordRepeat] = useState("")
@@ -18,7 +17,7 @@ const SignupForm: React.FC = () => {
 	}
 
 	return (
-		<div className="signup-form">
+		<div className="auth-form">
 			<h1 className="title">SignUp</h1>
 			<form onSubmit={handleSubmit}>
 				<div>
@@ -46,6 +45,13 @@ const SignupForm: React.FC = () => {
 
 			{signupError && <p style={{ color: "red" }}>{signupError}</p>}
 			{success && <p style={{ color: "green" }}>{success}</p>}
+
+			<p className="toggle-text">
+				Already have an account?{" "}
+				<button className="toggle-btn" onClick={toggleAuthMode}>
+					Log in here
+				</button>
+			</p>
 		</div>
 	)
 }

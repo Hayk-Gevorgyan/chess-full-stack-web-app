@@ -1,7 +1,9 @@
 import { makeExecutableSchema } from "@graphql-tools/schema"
-import typeDefs from "./typeDefs"
-import resolvers from "./resolvers"
+import httpTypeDefs from "./typedefs/httpTypeDefs"
+import subscriptionsTypeDefs from "./typedefs/subscriptionsTypeDefs"
+import httpResolvers from "./resolvers/httpResolvers"
+import subscriptionsResolvers from "./resolvers/subscriptionsResolvers"
 
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+export const httpSchema = makeExecutableSchema({ typeDefs: httpTypeDefs, resolvers: httpResolvers })
 
-export default schema
+export const subscriptionsSchema = makeExecutableSchema({ typeDefs: subscriptionsTypeDefs, resolvers: subscriptionsResolvers })

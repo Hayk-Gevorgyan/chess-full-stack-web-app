@@ -19,8 +19,10 @@ export default function isValidMove(board: Board, move: Move): boolean {
 	if (!piece) return false
 	const turn: PlayerColor = getPieceColor(piece) === PlayerColor.WHITE ? PlayerColor.WHITE : PlayerColor.BLACK
 
-	const loggedGetTurnMoves = logFunctionExecution(getTurnMoves)
-	const turnMoves: Move[] = loggedGetTurnMoves(turn, board)
+	// const loggedGetTurnMoves = logFunctionExecution(getTurnMoves)
+	// const turnMoves: Move[] = loggedGetTurnMoves(turn, board)
+
+	const turnMoves: Move[] = getTurnMoves(turn, board)
 	if (turnMoves.find((m) => move.from === m.from && move.to === m.to)) {
 		return true
 	}
@@ -60,13 +62,13 @@ export function getGameState(turn: PlayerColor, board: Board): GameState {
 function getTurnMoves(turn: PlayerColor, board: Board): Move[] {
 	const moves: Move[] = []
 
-	const loggedGetPawnMoves = logFunctionExecution(getPawnMoves)
-	const loggedGetRookMoves = logFunctionExecution(getRookMoves)
-	const loggedGetKnightMoves = logFunctionExecution(getKnightMoves)
-	const loggedGetBishopMoves = logFunctionExecution(getBishopMoves)
-	const loggedGetQueenMoves = logFunctionExecution(getQueenMoves)
-	const loggedGetKingMoves = logFunctionExecution(getKingMoves)
-	const loggedImmitateBoardAfterMove = logFunctionExecution(immitateBoardAfterMove)
+	// const loggedGetPawnMoves = logFunctionExecution(getPawnMoves)
+	// const loggedGetRookMoves = logFunctionExecution(getRookMoves)
+	// const loggedGetKnightMoves = logFunctionExecution(getKnightMoves)
+	// const loggedGetBishopMoves = logFunctionExecution(getBishopMoves)
+	// const loggedGetQueenMoves = logFunctionExecution(getQueenMoves)
+	// const loggedGetKingMoves = logFunctionExecution(getKingMoves)
+	// const loggedImmitateBoardAfterMove = logFunctionExecution(immitateBoardAfterMove)
 
 	//collect all not blocked moves and captures
 	for (let y = 0; y < 8; y++) {
@@ -76,22 +78,28 @@ function getTurnMoves(turn: PlayerColor, board: Board): Move[] {
 			const pieceType: PieceType = getPieceType(piece)
 			switch (pieceType) {
 				case PieceType.PAWN:
-					moves.push(...loggedGetPawnMoves(x, y, turn, board))
+					// moves.push(...loggedGetPawnMoves(x, y, turn, board))
+					moves.push(...getPawnMoves(x, y, turn, board))
 					break
 				case PieceType.ROOK:
-					moves.push(...loggedGetRookMoves(x, y, turn, board))
+					// moves.push(...loggedGetRookMoves(x, y, turn, board))
+					moves.push(...getRookMoves(x, y, turn, board))
 					break
 				case PieceType.KNIGHT:
-					moves.push(...loggedGetKnightMoves(x, y, turn, board))
+					// moves.push(...loggedGetKnightMoves(x, y, turn, board))
+					moves.push(...getKnightMoves(x, y, turn, board))
 					break
 				case PieceType.BISHOP:
-					moves.push(...loggedGetBishopMoves(x, y, turn, board))
+					// moves.push(...loggedGetBishopMoves(x, y, turn, board))
+					moves.push(...getBishopMoves(x, y, turn, board))
 					break
 				case PieceType.QUEEN:
-					moves.push(...loggedGetQueenMoves(x, y, turn, board))
+					// moves.push(...loggedGetQueenMoves(x, y, turn, board))
+					moves.push(...getQueenMoves(x, y, turn, board))
 					break
 				case PieceType.KING:
-					moves.push(...loggedGetKingMoves(x, y, turn, board))
+					// moves.push(...loggedGetKingMoves(x, y, turn, board))
+					moves.push(...getKingMoves(x, y, turn, board))
 					break
 				default:
 					continue
@@ -101,7 +109,8 @@ function getTurnMoves(turn: PlayerColor, board: Board): Move[] {
 
 	//return moves after which check doesnt occure to own king
 	return moves.filter((m) => {
-		const newBoard = loggedImmitateBoardAfterMove(board, m)
+		// const newBoard = loggedImmitateBoardAfterMove(board, m)
+		const newBoard = immitateBoardAfterMove(board, m)
 		if (!newBoard) return false
 		return !isCheck(turn, newBoard)
 	})
@@ -577,7 +586,7 @@ function isCheck(checkedColor: PlayerColor, board: Board): boolean {
 	return false
 }
 function getKingPosition(color: PlayerColor, board: Board): string | undefined {
-	logFunctionCall("getKingPosition", [color])
+	// logFunctionCall("getKingPosition", [color])
 	for (let y = 0; y < 8; y++) {
 		for (let x = 0; x < 8; x++) {
 			const piece = board[y][x]

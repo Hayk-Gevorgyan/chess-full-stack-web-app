@@ -1,85 +1,251 @@
+// models/GameModel.ts
+import { Db, Collection } from "mongodb"
 import isValidMove, { getGameState } from "../chessValidation/chessValidator"
 import { Game, Move, GameState, PlayerColor, Board } from "../types/types"
-import { generateId, lnToCoordinates, logFunctionExecution } from "../utils/helperFunctions"
+import { generateId, lnToCoordinates } from "../utils/helperFunctions"
 
-//singleton class
-export default class GameModel {
-	private activeGames: Game[] = []
-	private endedGames: Game[] = []
+export interface IGameModel {
+	handleStartGame: (username: string) => Promise<{ id: string; game?: Game }>
+	handleMakeMove: (gameId: string, username: string, move: Move) => Promise<Game | null>
+	handleResign: (username: string) => Promise<Game | null>
+	handleOfferDraw: (gameId: string, username: string) => Promise<Game | null>
+	handleAcceptDraw: (gameId: string, username: string) => Promise<Game | null>
+	handleDenyDraw: (gameId: string, username: string) => Promise<Game | null>
+	findActiveGameById: (id: string) => Promise<Game | null>
+	findActiveGameByUsername: (username: string) => Promise<Game | null>
+	getActiveGameIdByUsername: (username: string) => Promise<string>
+	findEndedGameById: (id: string) => Promise<Game | null>
+	findAllEndedGamesByUsername: (username: string) => Promise<Game[]>
+	isPlayerWaiting: (username: string) => string | undefined
+	removeWaitingPlayerByUsername: (username: string) => void
+	addWaitingPlayer: (username: string, newGameId: string) => void
+	endGame: (id: string, gameState: GameState) => Promise<Game | null>
+	resign: (username: string) => Promise<Game | null>
+	makeMove: (id: string, username: string, move: Move) => Promise<Move | null>
+}
+
+export default class GameModel implements IGameModel {
+	private gamesCollection: Collection<Game>
+	// Waiting players are maintained in memory.
 	private waitingPlayers: Map<string, string> = new Map<string, string>()
-	private static _instance: GameModel | undefined = undefined
 
-	constructor() {
-		if (GameModel._instance) {
-			return GameModel._instance
-		}
-		GameModel._instance = this
-		return GameModel._instance
+	constructor(db: Db) {
+		this.gamesCollection = db.collection("games")
 	}
 
-	handleStartGame(username: string): { id: string; game?: Game } {
-		if (this.isPlayerWaiting(username)) {
+	// ─── GAME START/WAITING LOGIC ──────────────────────────────────────────────
+
+	async handleStartGame(username: string): Promise<{ id: string; game?: Game }> {
+		// Check if user already has an active game.
+		const activeGame = await this.findActiveGameByUsername(username)
+		if (activeGame) {
+			return { id: activeGame.id, game: activeGame }
+		}
+
+		// Prevent duplicate waiting.
+		if (this.waitingPlayers.has(username)) {
 			throw new Error(`User ${username} is already waiting for a game.`)
 		}
 
-		const [waitingUsername, gameId] = this.waitingPlayers.entries().next().value || []
-		if (waitingUsername && gameId) {
+		// Look for a waiting opponent.
+		const waitingEntry = this.waitingPlayers.entries().next().value
+		if (waitingEntry) {
+			const [waitingUsername, gameId] = waitingEntry
 			this.removeWaitingPlayerByUsername(waitingUsername)
-			const game = this.addGame(gameId, { username1: waitingUsername, username2: username })
+			const game = await this.addGame(gameId, { username1: waitingUsername, username2: username })
 			return { id: game.id, game }
 		} else {
+			// No waiting players – add current user to waiting list.
 			const newGameId = generateId()
 			this.addWaitingPlayer(username, newGameId)
 			return { id: newGameId }
 		}
 	}
 
-	handleMakeMove(gameId: string, username: string, move: Move): Game | undefined {
-		if (this.makeMove(gameId, username, move)) {
-			const activeGame = this.findActiveGameById(gameId)
-			if (activeGame) return activeGame
-			return this.findEndedGameById(gameId)
+	private async addGame(id: string, { username1, username2 }: { username1: string; username2: string }): Promise<Game> {
+		const game: Game = {
+			id,
+			white: username1,
+			black: username2,
+			moves: [],
+			state: GameState.STARTED,
 		}
-	}
-
-	handleResign(gameId: string, username: string) {
-		const game = this.resign(gameId, username)
+		await this.gamesCollection.insertOne(game)
 		return game
 	}
 
-	handleOfferDraw(gameId: string, username: string) {
-		const activeGame = this.findActiveGameById(gameId)
-		if (activeGame) {
-			activeGame.drawOffer = username
-			return activeGame
-		} else {
-			console.error(`no active game found with id ${gameId}`)
-		}
+	// ─── MOVE REGISTRATION ─────────────────────────────────────────────────────
+
+	/**
+	 * Persists a move by computing the new moves array, board, and game state.
+	 * Uses updateOne to update the document in the DB.
+	 */
+	private async registerMove(game: Game, move: Move): Promise<Game> {
+		// Combine current moves with the new move.
+		const newMoves = [...game.moves, move]
+		// Compute board after new moves.
+		const board: Board = GameModel.boardAfterMoves(newMoves)
+		// Determine whose turn it is (after the new move).
+		const newTurn = newMoves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
+		// Calculate new game state once.
+		const gameState = getGameState(newTurn, board)
+		const updatedGame: Game = { ...game, moves: newMoves, state: gameState }
+		// Persist the updated game.
+		await this.gamesCollection.updateOne({ id: game.id }, { $set: updatedGame })
+		return updatedGame
 	}
 
-	handleAcceptDraw(gameId: string, username: string) {
-		const activeGame = this.findActiveGameById(gameId)
-		if (activeGame) {
-			if (activeGame.drawOffer !== username) {
-				activeGame.drawOffer = undefined
-				return this.endGame(gameId, GameState.DRAW)
-			}
-		} else {
-			console.error(`no active game found with id ${gameId}`)
+	// ─── GAME MOVE/UPDATE LOGIC ────────────────────────────────────────────────
+
+	async handleMakeMove(gameId: string, username: string, move: Move): Promise<Game | null> {
+		const game = await this.findActiveGameById(gameId)
+		if (!game) return null
+
+		// Validate move using current board state.
+		const turnColor = game.moves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
+		const board = GameModel.boardAfterMoves(game.moves)
+		if (!isValidMove(board, move)) {
+			return null
 		}
+		const turnPlayer = turnColor === PlayerColor.WHITE ? game.white : game.black
+		if (turnPlayer !== username) {
+			return null
+		}
+
+		// Register the move and persist updated game.
+		await this.registerMove(game, move)
+		// Return updated game: try active, otherwise ended.
+		const updatedGame = await this.findActiveGameById(gameId)
+		return updatedGame ? updatedGame : await this.findEndedGameById(gameId)
 	}
 
-	handleDenyDraw(gameId: string, username: string) {
-		const activeGame = this.findActiveGameById(gameId)
-		if (activeGame) {
-			if (activeGame.drawOffer !== username) {
-				activeGame.drawOffer = undefined
-				return activeGame
+	async makeMove(id: string, username: string, move: Move): Promise<Move | null> {
+		const game = await this.findActiveGameById(id)
+		if (game) {
+			const turnColor = game.moves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
+			const board = GameModel.boardAfterMoves(game.moves)
+			if (!isValidMove(board, move)) {
+				return null
+			}
+			const turnPlayer = turnColor === PlayerColor.WHITE ? game.white : game.black
+			if (turnPlayer !== username) {
+				return null
+			}
+			// Use the shared registerMove function.
+			await this.registerMove(game, move)
+			return move
+		}
+		return null
+	}
+
+	async handleResign(username: string): Promise<Game | null> {
+		const game = await this.findActiveGameByUsername(username)
+		if (game) {
+			const gameState = game.black === username ? GameState.WHITE_WIN : GameState.BLACK_WIN
+			return await this.endGame(game.id, gameState)
+		}
+		return null
+	}
+
+	async resign(username: string): Promise<Game | null> {
+		return this.handleResign(username)
+	}
+
+	async handleOfferDraw(gameId: string, username: string): Promise<Game | null> {
+		const game = await this.findActiveGameById(gameId)
+		if (game) {
+			game.drawOffer = username
+			await this.gamesCollection.updateOne({ id: gameId }, { $set: game })
+			return game
+		} else {
+			console.error(`No active game found with id ${gameId}`)
+		}
+		return null
+	}
+
+	async handleAcceptDraw(gameId: string, username: string): Promise<Game | null> {
+		const game = await this.findActiveGameById(gameId)
+		if (game) {
+			if (game.drawOffer !== username) {
+				game.drawOffer = undefined
+				game.state = GameState.DRAW
+				await this.gamesCollection.updateOne({ id: gameId }, { $set: game })
+				return game
 			}
 		} else {
-			console.error(`no active game found with id ${gameId}`)
+			console.error(`No active game found with id ${gameId}`)
 		}
+		return null
 	}
+
+	async handleDenyDraw(gameId: string, username: string): Promise<Game | null> {
+		const game = await this.findActiveGameById(gameId)
+		if (game) {
+			if (game.drawOffer !== username) {
+				game.drawOffer = undefined
+				await this.gamesCollection.updateOne({ id: gameId }, { $set: game })
+				return game
+			}
+		} else {
+			console.error(`No active game found with id ${gameId}`)
+		}
+		return null
+	}
+
+	async endGame(id: string, gameState: GameState): Promise<Game | null> {
+		const game = await this.findActiveGameById(id)
+		if (!game) return null
+		const updatedGame = { ...game, state: gameState }
+		await this.gamesCollection.updateOne({ id }, { $set: updatedGame })
+		return updatedGame
+	}
+
+	// ─── GAME RETRIEVAL METHODS ────────────────────────────────────────────────
+
+	async findActiveGameById(id: string): Promise<Game | null> {
+		return await this.gamesCollection.findOne({ id, state: GameState.STARTED })
+	}
+
+	async findActiveGameByUsername(username: string): Promise<Game | null> {
+		return await this.gamesCollection.findOne({
+			state: GameState.STARTED,
+			$or: [{ white: username }, { black: username }],
+		})
+	}
+
+	async getActiveGameIdByUsername(username: string): Promise<string> {
+		const game = await this.findActiveGameByUsername(username)
+		return game ? game.id : ""
+	}
+
+	async findEndedGameById(id: string): Promise<Game | null> {
+		return await this.gamesCollection.findOne({ id, state: { $ne: GameState.STARTED } })
+	}
+
+	async findAllEndedGamesByUsername(username: string): Promise<Game[]> {
+		return await this.gamesCollection
+			.find({
+				state: { $ne: GameState.STARTED },
+				$or: [{ white: username }, { black: username }],
+			})
+			.toArray()
+	}
+
+	// ─── WAITING PLAYERS MANAGEMENT ───────────────────────────────────────────
+
+	isPlayerWaiting(username: string): string | undefined {
+		return this.waitingPlayers.get(username)
+	}
+
+	removeWaitingPlayerByUsername(username: string): void {
+		this.waitingPlayers.delete(username)
+	}
+
+	addWaitingPlayer(username: string, newGameId: string): void {
+		this.waitingPlayers.set(username, newGameId)
+	}
+
+	// ─── STATIC HELPER METHODS FOR BOARD STATE ───────────────────────────────
 
 	static initialBoardSetup(): Board {
 		const newBoard: (string | null)[][] = Array(8)
@@ -100,10 +266,10 @@ export default class GameModel {
 		return derivedBoard
 	}
 
-	static immitateBoardAfterMove(board: Board, move: Move) {
+	static immitateBoardAfterMove(board: Board, move: Move): Board {
 		const from = lnToCoordinates(move.from)
 		const to = lnToCoordinates(move.to)
-		if (!from || !to) throw new Error("from ot to properties of move are not valid")
+		if (!from || !to) throw new Error("Invalid move coordinates")
 		const [fromX, fromY] = from
 		const [toX, toY] = to
 		const newBoard: Board = board.map((row) => row.slice())
@@ -111,156 +277,5 @@ export default class GameModel {
 		newBoard[toY][toX] = piece
 		newBoard[fromY][fromX] = null
 		return newBoard
-	}
-
-	private persistActiveGame(newGame: Game): Game | undefined {
-		try {
-			const activeGame = this.findActiveGameById(newGame.id)
-			if (activeGame) {
-				activeGame.moves = newGame.moves
-				console.log(`active game with ID ${activeGame.id} persisted successfully at index ${this.activeGames.indexOf(activeGame)}.`)
-				return activeGame
-			} else {
-				const endedGame = this.findEndedGameById(newGame.id)
-				if (endedGame) {
-					console.warn(`game with ID ${endedGame.id} has already ended.`)
-					return endedGame
-				} else {
-					this.activeGames.push(newGame)
-					console.log(`active game with ID ${newGame.id} initialized successfully at index ${this.activeGames.indexOf(newGame)}.`)
-					return activeGame
-				}
-			}
-		} catch (error) {
-			console.error("Error persisting game:", error)
-		}
-	}
-
-	private persistEndedGame(newGame: Game): Game | undefined {
-		try {
-			if (this.activeGames.some((g) => newGame.id === g.id)) {
-				this.removeActiveGameById(newGame.id)
-				if (!this.endedGames.some((g) => newGame.id === g.id)) {
-					this.endedGames.push(newGame)
-				}
-				return newGame
-			}
-		} catch (error) {
-			console.error("Failed to persist ended game." + error)
-		}
-	}
-
-	findActiveGameById(id: string): Game | undefined {
-		return this.activeGames.find((game) => game.id === id)
-	}
-
-	findActiveGameByUsername(username: string): Game | undefined {
-		return this.activeGames.find((game) => game.white === username || game.black === username)
-	}
-
-	findEndedGameById(id: string): Game | undefined {
-		return this.endedGames.find((game) => game.id === id)
-	}
-
-	findEndedGameByUsername(username: string): Game | undefined {
-		return this.endedGames.find((game) => game.white === username || game.black === username)
-	}
-
-	findAllEndedGamesByUsername(username: string): Game[] | undefined {
-		const games = this.endedGames.filter((game) => game.white === username || game.black === username)
-		return games ? games : []
-	}
-	private removeActiveGameById(id: string): Game | undefined {
-		const index = this.activeGames.findIndex((game) => game.id === id)
-		if (index !== -1) {
-			return this.activeGames.splice(index, 1)[0]
-		}
-		return undefined
-	}
-
-	private addGame(id: string, { username1, username2 }: { username1: string; username2: string }): Game {
-		const game: Game = {
-			id,
-			white: username1,
-			black: username2,
-			moves: [],
-			state: GameState.STARTED,
-		}
-
-		this.persistActiveGame(game)
-		return game
-	}
-
-	isPlayerWaiting(username: string): boolean {
-		return this.waitingPlayers.has(username)
-	}
-	removeWaitingPlayerByUsername(username: string): void {
-		this.waitingPlayers.delete(username)
-	}
-
-	addWaitingPlayer(username: string, newGameId: string): void {
-		this.waitingPlayers.set(username, newGameId)
-	}
-
-	endGame(id: string, gameState: GameState): Game | undefined {
-		const game = this.findActiveGameById(id)
-		if (!game) return
-
-		const newGame = { ...game, state: gameState }
-		const persistedGame = this.persistEndedGame(newGame)
-		console.log(`Game with ID ${id} ended successfully.`)
-		return persistedGame
-	}
-
-	resign(id: string, username: string): Game | undefined {
-		const game = this.findActiveGameById(id)
-		if (game && (game.white === username || game.black === username)) {
-			const gameState = game.black === username ? GameState.WHITE_WIN : GameState.BLACK_WIN
-			const endedGame = this.endGame(game.id, gameState)
-			return endedGame ? endedGame : undefined
-		}
-	}
-
-	makeMove(id: string, username: string, move: Move): Move | undefined {
-		const game = this.findActiveGameById(id)
-		if (game) {
-			const turnColor = this.getTurn(game.moves.length)
-			const board = GameModel.boardAfterMoves(game.moves)
-			const loggedIsValidMove = logFunctionExecution(isValidMove)
-			const isValid = loggedIsValidMove(board, move)
-			const turnPlayer = turnColor === PlayerColor.WHITE ? game.white : game.black
-			if (turnPlayer === username && isValid) {
-				this.registerMove(game, move)
-			}
-			return move
-		}
-	}
-
-	makeMoveWithoutAuth(id: string, move: Move) {
-		const game = this.findActiveGameById(id)
-		if (game) {
-			const board = GameModel.boardAfterMoves(game.moves)
-			const loggedIsValidMove = logFunctionExecution(isValidMove)
-			const isValid = loggedIsValidMove(board, move)
-			if (isValid) {
-				this.registerMove(game, move)
-			}
-		}
-	}
-	private getTurn(movesLength: number): PlayerColor {
-		return movesLength % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
-	}
-
-	private registerMove(game: Game, move: Move): void {
-		if (!game) return
-		const newGame = { ...game }
-		const board = GameModel.boardAfterMoves([...newGame.moves, move])
-		newGame.moves.push(move)
-		const gameState = getGameState(this.getTurn(newGame.moves.length), board)
-		if (gameState === GameState.STARTED) {
-			this.persistActiveGame(newGame)
-		} else if (gameState === GameState.DRAW || gameState === GameState.WHITE_WIN || gameState === GameState.BLACK_WIN) {
-			this.endGame(newGame.id, gameState) //calls persistEndedGame
-		}
 	}
 }

@@ -1,6 +1,9 @@
 export interface User {
-	id: number
 	username: string
+}
+
+export interface UserWithPassword extends User {
+	id?: string
 	password: string
 }
 

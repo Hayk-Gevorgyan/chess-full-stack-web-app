@@ -92,3 +92,7 @@ export function logFunctionExecution(fn: Function) {
 		return result
 	}
 }
+
+export function getTurn(movesLength: number): PlayerColor {
+	return movesLength % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
+}

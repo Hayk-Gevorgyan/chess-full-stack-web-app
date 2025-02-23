@@ -1,5 +1,5 @@
 import { createContext } from "react"
-import { ChessClientEvent, Color, GameState, Move } from "../../game/types/types"
+import { ChessClientEvent, Color, GameState, Move } from "../../chessGame/types/types"
 
 export interface ChessWebSocketMessage {
 	event: ChessClientEvent

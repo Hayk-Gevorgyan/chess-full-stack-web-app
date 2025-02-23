@@ -1,8 +1,8 @@
 import React, { useState } from "react"
 import { useAuthContext } from "../../shared/hooks/useAuthContext"
-import "../styles/LoginForm.css"
+import ToggleLoginSignup from "./ToggleLoginSignup"
 
-const LoginForm: React.FC = () => {
+const LoginForm = ({ toggleAuthMode }: { toggleAuthMode: () => void }) => {
 	const [username, setUsername] = useState("")
 	const [password, setPassword] = useState("")
 	const { loginError, success, logIn } = useAuthContext()
@@ -17,7 +17,7 @@ const LoginForm: React.FC = () => {
 	}
 
 	return (
-		<div className="login-form">
+		<div className="auth-form">
 			<h1 className="title">Login</h1>
 			<form onSubmit={handleSubmit}>
 				<div>
@@ -39,6 +39,8 @@ const LoginForm: React.FC = () => {
 
 			{loginError && <p style={{ color: "red" }}>{loginError}</p>}
 			{success && <p style={{ color: "green" }}>{success}</p>}
+
+			<ToggleLoginSignup toggleAuthMode={toggleAuthMode} />
 		</div>
 	)
 }

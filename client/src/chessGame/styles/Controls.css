@@ -1,0 +1,35 @@
+.controls-container {
+	width: var(--square-size);
+	height: calc(7 * var(--square-size));
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: space-evenly;
+	gap: 1rem;
+}
+
+.controls-container button {
+	margin: 0;
+	flex: 1;
+	height: 100%;
+	width: 100%;
+}
+
+.confirmation-dialog,
+.opponent-draw-offer {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: var(--secondary-color);
+	color: var(--light-grey);
+	padding: 1rem;
+	border-radius: 1rem;
+	box-shadow: 0 0 0.5rem black;
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+}

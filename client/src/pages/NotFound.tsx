@@ -7,7 +7,7 @@ const NotFound = () => {
 		<div className="notfound-page-container">
 			<NavBar />
 			<div className="content">
-				<Header name="Page Not Found" />
+				<Header name="Page Not Found" showLogoutButton={false} />
 			</div>
 		</div>
 	)
