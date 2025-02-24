@@ -1,4 +1,36 @@
-import { PieceType, PlayerColor } from "../types/types"
+import { Board, Move, PieceType, PlayerColor } from "../../types/types"
+
+export function initialBoardSetup(): Board {
+	const newBoard: (string | null)[][] = Array(8)
+		.fill(null)
+		.map(() => Array(8).fill(null))
+	newBoard[0] = ["rb", "nb", "bb", "qb", "kb", "bb", "nb", "rb"]
+	newBoard[1] = Array(8).fill("pb")
+	newBoard[6] = Array(8).fill("pw")
+	newBoard[7] = ["rw", "nw", "bw", "qw", "kw", "bw", "nw", "rw"]
+	return newBoard
+}
+
+export function boardAfterMoves(moves: Move[]): Board {
+	let derivedBoard: Board = initialBoardSetup()
+	moves.forEach((move) => {
+		derivedBoard = immitateBoardAfterMove(derivedBoard, move)
+	})
+	return derivedBoard
+}
+
+export function immitateBoardAfterMove(board: Board, move: Move): Board {
+	const from = lnToCoordinates(move.from)
+	const to = lnToCoordinates(move.to)
+	if (!from || !to) throw new Error("Invalid move coordinates")
+	const [fromX, fromY] = from
+	const [toX, toY] = to
+	const newBoard: Board = board.map((row) => row.slice())
+	const piece = move.promotion ? move.promotion : board[fromY][fromX]
+	newBoard[toY][toX] = piece
+	newBoard[fromY][fromX] = null
+	return newBoard
+}
 
 export function lnToCoordinates(letterNumber: string): [number, number] | undefined {
 	const letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -56,40 +88,6 @@ export function getPieceColor(piece: string | null | undefined): PlayerColor {
 			return PlayerColor.BLACK
 		default:
 			return PlayerColor.INVALID_COLOR
-	}
-}
-
-export function generateId(): string {
-	return Math.random().toString(36).substr(2, 9)
-}
-
-export function logFunctionCall(functionName: string, args: any[]) {
-	console.log(`Function: ${functionName} | Parameters: ${JSON.stringify(args)}`)
-}
-
-export function logFunctionExecution(fn: Function) {
-	return function (this: any, ...args: any[]) {
-		// Explicitly typing 'this' as 'any'
-
-		const loggedArgs = args.filter((arg) => !Array.isArray(arg))
-		console.log(`Function: ${fn.name} started with parameters:`, loggedArgs)
-		const startTime = Date.now()
-
-		// Call the original function
-		const result = fn.apply(this, args)
-
-		// If the function is asynchronous, handle promises
-		if (result instanceof Promise) {
-			return result.then((res) => {
-				const endTime = Date.now()
-				console.log(`Function: ${fn.name} ended. Time taken: ${endTime - startTime}ms`)
-				return res
-			})
-		}
-
-		const endTime = Date.now()
-		console.log(`Function: ${fn.name} ended. Time taken: ${endTime - startTime}ms`)
-		return result
 	}
 }
 
