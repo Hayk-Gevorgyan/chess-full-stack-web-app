@@ -9,6 +9,7 @@ import UserModel from "./src/models/UserModel"
 import GameModel from "./src/models/GameModel"
 import AuthController from "./src/chessGraphQLws/AuthController"
 import GameController from "./src/chessGraphQLws/GameController"
+import ChessValidator from "./src/chessValidation/ChessValidator"
 
 dotenv.config()
 
@@ -36,9 +37,11 @@ async function init() {
 		process.exit(1)
 	}
 
+	const chessValidator = new ChessValidator(false)
+
 	// Instantiate models
 	const userModel = new UserModel(db)
-	const gameModel = new GameModel(db)
+	const gameModel = new GameModel(db, chessValidator)
 
 	// Instantiate controllers
 	authController = new AuthController(userModel)

@@ -1,8 +1,10 @@
 // models/GameModel.ts
 import { Db, Collection } from "mongodb"
-import isValidMove, { getGameState } from "../chessValidation/chessValidator"
+// import isValidMove, { getGameState } from "../chessValidation/isValidMove"
 import { Game, Move, GameState, PlayerColor, Board } from "../types/types"
-import { generateId, lnToCoordinates } from "../utils/helperFunctions"
+import { generateId } from "../utils/helperFunctions/idGenerator"
+import { boardAfterMoves } from "../utils/helperFunctions/gameHelperFunctions"
+import { IChessValidator } from "../chessValidation/ChessValidator"
 
 export interface IGameModel {
 	handleStartGame: (username: string) => Promise<{ id: string; game?: Game }>
@@ -18,19 +20,17 @@ export interface IGameModel {
 	findAllEndedGamesByUsername: (username: string) => Promise<Game[]>
 	isPlayerWaiting: (username: string) => string | undefined
 	removeWaitingPlayerByUsername: (username: string) => void
-	addWaitingPlayer: (username: string, newGameId: string) => void
-	endGame: (id: string, gameState: GameState) => Promise<Game | null>
-	resign: (username: string) => Promise<Game | null>
-	makeMove: (id: string, username: string, move: Move) => Promise<Move | null>
 }
 
 export default class GameModel implements IGameModel {
 	private gamesCollection: Collection<Game>
+	private validator: IChessValidator
 	// Waiting players are maintained in memory.
 	private waitingPlayers: Map<string, string> = new Map<string, string>()
 
-	constructor(db: Db) {
+	constructor(db: Db, validator: IChessValidator) {
 		this.gamesCollection = db.collection("games")
+		this.validator = validator
 	}
 
 	// ─── GAME START/WAITING LOGIC ──────────────────────────────────────────────
@@ -62,6 +62,12 @@ export default class GameModel implements IGameModel {
 		}
 	}
 
+	/**
+	 * @param id game id to be created
+	 * @param param1 object containig the game participants` usernames
+	 * @returns the created and persisted game object
+	 * creates a game in DB and returns the game object
+	 */
 	private async addGame(id: string, { username1, username2 }: { username1: string; username2: string }): Promise<Game> {
 		const game: Game = {
 			id,
@@ -77,6 +83,9 @@ export default class GameModel implements IGameModel {
 	// ─── MOVE REGISTRATION ─────────────────────────────────────────────────────
 
 	/**
+	 * @param game the game object where move will be registered
+	 * @param move the move to be registered
+	 * @returns the updated game parameter object after updating in DB
 	 * Persists a move by computing the new moves array, board, and game state.
 	 * Uses updateOne to update the document in the DB.
 	 */
@@ -84,11 +93,11 @@ export default class GameModel implements IGameModel {
 		// Combine current moves with the new move.
 		const newMoves = [...game.moves, move]
 		// Compute board after new moves.
-		const board: Board = GameModel.boardAfterMoves(newMoves)
+		const board: Board = boardAfterMoves(newMoves)
 		// Determine whose turn it is (after the new move).
 		const newTurn = newMoves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
 		// Calculate new game state once.
-		const gameState = getGameState(newTurn, board)
+		const gameState = this.validator.getGameState(newTurn, board)
 		const updatedGame: Game = { ...game, moves: newMoves, state: gameState }
 		// Persist the updated game.
 		await this.gamesCollection.updateOne({ id: game.id }, { $set: updatedGame })
@@ -97,34 +106,33 @@ export default class GameModel implements IGameModel {
 
 	// ─── GAME MOVE/UPDATE LOGIC ────────────────────────────────────────────────
 
+	/**
+	 * @param gameId game id where the move registration will be handled
+	 * @param username who moves
+	 * @param move the move to be registered
+	 * @returns active game if the game didn`t end after the move, ended game if the game ended after the move or null if the move was invalid
+	 */
 	async handleMakeMove(gameId: string, username: string, move: Move): Promise<Game | null> {
-		const game = await this.findActiveGameById(gameId)
-		if (!game) return null
-
-		// Validate move using current board state.
-		const turnColor = game.moves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
-		const board = GameModel.boardAfterMoves(game.moves)
-		if (!isValidMove(board, move)) {
-			return null
+		if (await this.makeMove(gameId, username, move)) {
+			const activeGame = await this.findActiveGameById(gameId)
+			if (activeGame) return activeGame
+			return this.findEndedGameById(gameId)
 		}
-		const turnPlayer = turnColor === PlayerColor.WHITE ? game.white : game.black
-		if (turnPlayer !== username) {
-			return null
-		}
-
-		// Register the move and persist updated game.
-		await this.registerMove(game, move)
-		// Return updated game: try active, otherwise ended.
-		const updatedGame = await this.findActiveGameById(gameId)
-		return updatedGame ? updatedGame : await this.findEndedGameById(gameId)
+		return null
 	}
 
-	async makeMove(id: string, username: string, move: Move): Promise<Move | null> {
-		const game = await this.findActiveGameById(id)
+	/**
+	 * @param gameId the game where the move is made
+	 * @param username who made the move
+	 * @param move the move to be made
+	 * @returns the move if valid, otherwise null
+	 */
+	private async makeMove(gameId: string, username: string, move: Move): Promise<Move | null> {
+		const game = await this.findActiveGameById(gameId)
 		if (game) {
 			const turnColor = game.moves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
-			const board = GameModel.boardAfterMoves(game.moves)
-			if (!isValidMove(board, move)) {
+			const board = boardAfterMoves(game.moves)
+			if (!this.validator.validateMove(board, move)) {
 				return null
 			}
 			const turnPlayer = turnColor === PlayerColor.WHITE ? game.white : game.black
@@ -138,6 +146,10 @@ export default class GameModel implements IGameModel {
 		return null
 	}
 
+	/**
+	 * @param username who resigned
+	 * @returns the ended game if resignition successful, otherwise null
+	 */
 	async handleResign(username: string): Promise<Game | null> {
 		const game = await this.findActiveGameByUsername(username)
 		if (game) {
@@ -145,10 +157,6 @@ export default class GameModel implements IGameModel {
 			return await this.endGame(game.id, gameState)
 		}
 		return null
-	}
-
-	async resign(username: string): Promise<Game | null> {
-		return this.handleResign(username)
 	}
 
 	async handleOfferDraw(gameId: string, username: string): Promise<Game | null> {
@@ -192,7 +200,7 @@ export default class GameModel implements IGameModel {
 		return null
 	}
 
-	async endGame(id: string, gameState: GameState): Promise<Game | null> {
+	private async endGame(id: string, gameState: GameState): Promise<Game | null> {
 		const game = await this.findActiveGameById(id)
 		if (!game) return null
 		const updatedGame = { ...game, state: gameState }
@@ -241,41 +249,7 @@ export default class GameModel implements IGameModel {
 		this.waitingPlayers.delete(username)
 	}
 
-	addWaitingPlayer(username: string, newGameId: string): void {
+	private addWaitingPlayer(username: string, newGameId: string): void {
 		this.waitingPlayers.set(username, newGameId)
-	}
-
-	// ─── STATIC HELPER METHODS FOR BOARD STATE ───────────────────────────────
-
-	static initialBoardSetup(): Board {
-		const newBoard: (string | null)[][] = Array(8)
-			.fill(null)
-			.map(() => Array(8).fill(null))
-		newBoard[0] = ["rb", "nb", "bb", "qb", "kb", "bb", "nb", "rb"]
-		newBoard[1] = Array(8).fill("pb")
-		newBoard[6] = Array(8).fill("pw")
-		newBoard[7] = ["rw", "nw", "bw", "qw", "kw", "bw", "nw", "rw"]
-		return newBoard
-	}
-
-	static boardAfterMoves(moves: Move[]): Board {
-		let derivedBoard: Board = this.initialBoardSetup()
-		moves.forEach((move) => {
-			derivedBoard = this.immitateBoardAfterMove(derivedBoard, move)
-		})
-		return derivedBoard
-	}
-
-	static immitateBoardAfterMove(board: Board, move: Move): Board {
-		const from = lnToCoordinates(move.from)
-		const to = lnToCoordinates(move.to)
-		if (!from || !to) throw new Error("Invalid move coordinates")
-		const [fromX, fromY] = from
-		const [toX, toY] = to
-		const newBoard: Board = board.map((row) => row.slice())
-		const piece = move.promotion ? move.promotion : board[fromY][fromX]
-		newBoard[toY][toX] = piece
-		newBoard[fromY][fromX] = null
-		return newBoard
 	}
 }
