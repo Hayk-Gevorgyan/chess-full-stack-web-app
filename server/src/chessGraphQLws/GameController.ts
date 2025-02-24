@@ -2,7 +2,7 @@ import { GraphQLError } from "graphql"
 import { IGameModel } from "../models/GameModel"
 import { Move } from "../types/types"
 import pubSub from "./pubsub"
-import { ReconnectPayload } from "./schema/resolvers/resolvers"
+import { ReconnectPayload } from "./schema/resolvers/httpResolvers"
 
 const GAME_UPDATED = "GAME_UPDATED"
 

@@ -3,7 +3,7 @@ import { IUserModel } from "../models/UserModel"
 import { User } from "../types/types"
 import { Request, Response } from "express"
 import jwt, { JwtPayload } from "jsonwebtoken"
-import { AuthPayload } from "./schema/resolvers/resolvers"
+import { AuthPayload } from "./schema/resolvers/httpResolvers"
 
 export interface AuthContext extends BaseContext {
 	user?: User
