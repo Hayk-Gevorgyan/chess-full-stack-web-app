@@ -2,9 +2,10 @@ import { useEffect, useState } from "react"
 import { GameState } from "../types/types"
 import "../styles/Controls.css"
 import { useGameContext } from "../../shared/hooks/useGameContext"
+import StartGameButton from "../../shared/components/StartGameButton"
 
 const Controls = () => {
-	const { resign, offerDraw, gameState, startGame, opponentOfferedDraw, acceptDraw, denyDraw } = useGameContext()
+	const { resign, offerDraw, gameState, opponentOfferedDraw, acceptDraw, denyDraw } = useGameContext()
 	const [showConfirmation, setShowConfirmation] = useState<"resign" | "draw" | null>(null)
 
 	useEffect(() => {
@@ -38,9 +39,7 @@ const Controls = () => {
 				</>
 			) : null}
 			{gameState === GameState.WHITE_WIN || gameState === GameState.BLACK_WIN || gameState === GameState.DRAW ? (
-				<button className="common-btn" onClick={() => startGame()}>
-					Start Game
-				</button>
+				<StartGameButton />
 			) : null}
 
 			{showConfirmation && (

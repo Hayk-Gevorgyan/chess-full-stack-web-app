@@ -10,13 +10,21 @@ const StartGameButton = () => {
 
 	useEffect(() => {
 		if (startGameClicked) {
-			startGame()
 			navigate("/game")
+			setStartGameClicked(false)
 		}
 	}, [startGameClicked, navigate, startGame])
 
 	return (
-		<button type="button" className="start-game-btn common-btn" onClick={() => setStartGameClicked(true)} disabled={startGameClicked}>
+		<button
+			type="button"
+			className="start-game-btn common-btn"
+			onClick={() => {
+				setStartGameClicked(true)
+				startGame()
+			}}
+			disabled={startGameClicked}
+		>
 			Start Game
 		</button>
 	)

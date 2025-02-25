@@ -1,10 +1,10 @@
-import NavBar from "../shared/components/NavBar"
-import Header from "../shared/components/Header"
-import ChessBoard from "../chessGame/components/ChessBoard"
-import { initialBoardSetup } from "../chessGame/chessValidation/helperFunctions"
-import StartGameButton from "../shared/components/StartGameButton"
-import { useAuthContext } from "../shared/hooks/useAuthContext"
-import "./HomePage.css"
+import NavBar from "../../shared/components/NavBar"
+import Header from "../../shared/components/Header"
+import ChessBoard from "../../chessGame/components/ChessBoard"
+import { initialBoardSetup } from "../../chessGame/chessValidation/helperFunctions"
+import StartGameButton from "../../shared/components/StartGameButton"
+import { useAuthContext } from "../../shared/hooks/useAuthContext"
+import "../styles/HomePage.css"
 
 const HomePage = () => {
 	const { username } = useAuthContext()
