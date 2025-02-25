@@ -22,7 +22,10 @@ export function boardAfterMoves(moves: Move[]): Board {
 export function immitateBoardAfterMove(board: Board, move: Move): Board {
 	const from = lnToCoordinates(move.from)
 	const to = lnToCoordinates(move.to)
-	if (!from || !to) throw new Error("Invalid move coordinates")
+	if (!from || !to) {
+		console.error("Invalid move coordinates")
+		return initialBoardSetup()
+	}
 	const [fromX, fromY] = from
 	const [toX, toY] = to
 	const newBoard: Board = board.map((row) => row.slice())

@@ -54,7 +54,7 @@ export default class ChessGraphQLWSServer {
 				context: async ({ req, res }: { req: Request; res: Response }) => this.authController.getAuthContext({ req, res }),
 			})
 		)
-		console.log("connected apollo server to", path)
+		// console.log("connected apollo server to", path)
 	}
 
 	/**
@@ -84,14 +84,14 @@ export default class ChessGraphQLWSServer {
 				context: (ctx: any) => {
 					return this.authController.getAuthContext({ connectionParams: ctx.connectionParams })
 				},
-				onConnect: (ctx) => {
-					const { user } = this.authController.getAuthContext({ connectionParams: ctx.connectionParams })
-					console.log("Client connected", { user })
+				onConnect: async (ctx) => {
+					const { user } = await this.authController.getAuthContext({ connectionParams: ctx.connectionParams })
+					// console.log("Client connected", { user })
 					if (user) this.gameController.reconnectToGame({ username: user.username })
 				},
-				onClose: (ctx) => {
-					const { user } = this.authController.getAuthContext({ connectionParams: ctx.connectionParams })
-					console.log("Client disconnected", ctx.connectionParams)
+				onClose: async (ctx) => {
+					const { user } = await this.authController.getAuthContext({ connectionParams: ctx.connectionParams })
+					// console.log("Client disconnected", ctx.connectionParams)
 					if (user) this.gameController.disconnectFromGame(user.username)
 				},
 			},
@@ -100,6 +100,6 @@ export default class ChessGraphQLWSServer {
 
 		this.isConnected = true
 
-		console.log("connected to", path)
+		// console.log("connected to", path)
 	}
 }

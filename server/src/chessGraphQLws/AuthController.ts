@@ -7,12 +7,11 @@ import { AuthPayload } from "./schema/resolvers/httpResolvers"
 
 export interface AuthContext extends BaseContext {
 	user?: User
-	newToken?: string
 }
 
 export default class AuthController {
 	private static readonly JWT_SECRET = "very secret token"
-	private static readonly EXPIRATION_TIME = "1M"
+	private static readonly EXPIRATION_TIME = "30d"
 	private userModel: IUserModel
 	private static _instance: AuthController | undefined = undefined
 
@@ -37,14 +36,27 @@ export default class AuthController {
 	 * @param connectionParams - The connection parameters from the WS connection.
 	 * @returns An object containing a `user` property if token is valid.
 	 */
-	getAuthContext({ req, res, connectionParams }: { req?: Request; res?: Response; connectionParams?: Record<string, any> }): AuthContext {
+	async getAuthContext({
+		req,
+		res,
+		connectionParams,
+	}: {
+		req?: Request
+		res?: Response
+		connectionParams?: Record<string, any>
+	}): Promise<AuthContext> {
 		let token: string | undefined | null
 
 		if (req) {
 			// For HTTP requests
 			token = req.headers["x-access-token"] as string | undefined | null
 			const { operationName } = req.body
-			if (operationName.toLowerCase() === "signup" || operationName.toLowerCase() === "login") return {}
+			if (
+				operationName.toLowerCase() === "signup" ||
+				operationName.toLowerCase() === "login" ||
+				operationName.toLowerCase() === "logout"
+			)
+				return {}
 		} else if (connectionParams) {
 			// For WebSocket connection params (subscriptions)
 			token = connectionParams["x-access-token"] as string | undefined | null
@@ -57,9 +69,16 @@ export default class AuthController {
 			// Remove any surrounding quotes from the token if present
 			token = token.replace(/^"(.*)"$/, "$1")
 
+			// const decoded = jwt.decode(token) as JwtPayload
+
+			// const username = decoded.username
+
+			// if (username) {
+			// 	this.userModel.findUser(username).then()
+			// }
 			try {
 				const decoded = jwt.verify(token, AuthController.JWT_SECRET) as JwtPayload
-				console.log("decoded", decoded)
+				// console.log("decoded", decoded)
 				user = { username: decoded.username as string }
 			} catch (error) {
 				if (error instanceof jwt.TokenExpiredError) {
@@ -67,7 +86,8 @@ export default class AuthController {
 
 					const decoded = jwt.decode(token) as JwtPayload
 					if (!decoded?.exp) {
-						throw new Error("Invalid token: missing expiration time")
+						console.error("Invalid token: missing expiration time")
+						return {}
 					}
 
 					const now = Math.floor(Date.now() / 1000)
@@ -86,7 +106,7 @@ export default class AuthController {
 
 						// Only set the header if we're in an HTTP request (i.e. res is available)
 						if (res) {
-							console.log("refresh token set", newToken)
+							// console.log("refresh token set", newToken)
 							res.setHeader("x-refresh-token", newToken)
 						}
 					}
@@ -112,7 +132,7 @@ export default class AuthController {
 		// Sign a JWT token
 		const token = this.signToken(user)
 
-		console.log("token", token)
+		// console.log("signup token", token)
 
 		authPayload.message = "User created successfully"
 		authPayload.username = user.username
@@ -138,7 +158,7 @@ export default class AuthController {
 		// console.log("Signing payload:", { id: user.id, username: user.username })
 		const token = this.signToken(user)
 
-		console.log("token", token)
+		// console.log("login token", token)
 
 		authPayload.message = "Login successful"
 		authPayload.username = user.username

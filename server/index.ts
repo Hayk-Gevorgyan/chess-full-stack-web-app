@@ -57,13 +57,3 @@ init().catch(console.error)
 
 // Export controllers for resolvers
 export { authController, gameController }
-//ChessGraphQLWSServer
-//uncomment to use chess graphql server
-// const gqls = new ChessGraphQLWSServer(db)
-// gqls.connect("/subscriptions", server)
-// gqls.connectApolloServer(app)
-
-//ChessWebSocketServer
-//uncomment to use chess web socket server
-// const wss = new ChessWebSocketServer()
-// wss.connect(server)

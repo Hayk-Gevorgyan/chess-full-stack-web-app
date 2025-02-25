@@ -24,6 +24,7 @@ export const useLocalStorage = (key: string) => {
 	const removeItem = useCallback(() => {
 		try {
 			window.localStorage.removeItem(key)
+			console.log("removed", key)
 		} catch (error) {
 			console.log(error)
 		}

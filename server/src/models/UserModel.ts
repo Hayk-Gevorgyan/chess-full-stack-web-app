@@ -16,18 +16,18 @@ export default class UserModel implements IUserModel {
 	saltRounds: number = parseInt(bycryptSaltRounds, 10)
 
 	constructor(db: Db) {
-		console.log("mongodb users collection")
+		// console.log("mongodb users collection")
 		this.usersCollection = db.collection("users")
 	}
 
 	async addUser(username: string, password: string): Promise<UserWithPassword> {
-		console.log("[mongo add user call]", { username, password })
+		// console.log("[mongo add user call]", { username, password })
 		const hashedPassword = await bcrypt.hash(password, this.saltRounds)
 		// Create a user object without the id so that MongoDB generates _id.
 		const user = { username, password: hashedPassword }
 		const result = await this.usersCollection.insertOne(user)
 		// Return the inserted document with the generated id.
-		console.log("[add user result user]", user)
+		// console.log("[add user result user]", user)
 
 		return { id: result.insertedId.toHexString(), ...user }
 	}

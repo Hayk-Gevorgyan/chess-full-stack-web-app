@@ -2,7 +2,7 @@ import { GraphQLError } from "graphql"
 import { IGameModel } from "../models/GameModel"
 import { Move } from "../types/types"
 import pubSub from "./pubsub"
-import { ReconnectPayload } from "./schema/resolvers/httpResolvers"
+import { AuthenticatePayload } from "./schema/resolvers/httpResolvers"
 
 const GAME_UPDATED = "GAME_UPDATED"
 
@@ -35,7 +35,7 @@ export default class GameController {
 		return this.gameModel.findAllEndedGamesByUsername(username)
 	}
 
-	async reconnectToGame(reconnectPayload: ReconnectPayload) {
+	async reconnectToGame(reconnectPayload: AuthenticatePayload) {
 		const error = reconnectPayload.error
 
 		if (error) {
@@ -60,7 +60,7 @@ export default class GameController {
 
 	async startGame(username: string) {
 		const { id, game } = await this.gameModel.handleStartGame(username)
-		console.log("game start result", { id, game })
+		// console.log("game start result", { id, game })
 		if (!game) {
 			return { id }
 		} else {
@@ -75,7 +75,6 @@ export default class GameController {
 	async makeMove(username: string, move: Move) {
 		const id = await this.gameModel.getActiveGameIdByUsername(username)
 		if (!id) return null
-		console.log("make move id:", id, "move:", move, "username:", username)
 		const game = await this.gameModel.handleMakeMove(id, username, move)
 		pubSub.publish(`${GAME_UPDATED}_${id}`, { gameUpdated: game })
 	}
@@ -83,7 +82,7 @@ export default class GameController {
 	async resign(username: string) {
 		const id = await this.gameModel.getActiveGameIdByUsername(username)
 		if (!id) return null
-		console.log("resign id:", id, "username:", username)
+		// console.log("resign id:", id, "username:", username)
 		const game = await this.gameModel.handleResign(username)
 		pubSub.publish(`${GAME_UPDATED}_${id}`, { gameUpdated: game })
 	}
@@ -91,7 +90,7 @@ export default class GameController {
 	async offerDraw(username: string) {
 		const id = await this.gameModel.getActiveGameIdByUsername(username)
 		if (!id) return null
-		console.log("offer draw id:", id, "username:", username)
+		// console.log("offer draw id:", id, "username:", username)
 		const game = await this.gameModel.handleOfferDraw(id, username)
 		pubSub.publish(`${GAME_UPDATED}_${id}`, { gameUpdated: game })
 	}
@@ -99,7 +98,7 @@ export default class GameController {
 	async acceptDraw(username: string) {
 		const id = await this.gameModel.getActiveGameIdByUsername(username)
 		if (!id) return null
-		console.log("accept draw id:", id)
+		// console.log("accept draw id:", id)
 		const game = await this.gameModel.handleAcceptDraw(id, username)
 		pubSub.publish(`${GAME_UPDATED}_${id}`, { gameUpdated: game })
 	}
@@ -107,7 +106,7 @@ export default class GameController {
 	async denyDraw(username: string) {
 		const id = await this.gameModel.getActiveGameIdByUsername(username)
 		if (!id) return null
-		console.log("deny draw id:", id)
+		// console.log("deny draw id:", id)
 		const game = await this.gameModel.handleDenyDraw(id, username)
 		pubSub.publish(`${GAME_UPDATED}_${id}`, { gameUpdated: game })
 	}
@@ -116,16 +115,17 @@ export default class GameController {
 		const id = this.gameModel.isPlayerWaiting(username)
 
 		if (id) {
-			console.log(username, "subscribed to", id)
+			// console.log(username, "subscribed to", id)
 			return pubSub.asyncIterableIterator(`${GAME_UPDATED}_${id}`)
 		} else {
 			const game = await this.gameModel.findActiveGameByUsername(username)
 			if (!game) {
-				throw new GraphQLError("No active game found for this user.", {
+				console.error("No active game found for this user.", {
 					extensions: { code: "GAME_NOT_FOUND" },
 				})
+				return
 			}
-			console.log(username, "subscribed to", game.id)
+			// console.log(username, "subscribed to", game.id)
 			return pubSub.asyncIterableIterator(`${GAME_UPDATED}_${game.id}`)
 		}
 	}
@@ -136,7 +136,7 @@ export default class GameController {
 			clearTimeout(timeoutId)
 			this.disconnectedPlayers.delete(username)
 		} else {
-			console.log("player was not disconnected")
+			// console.log("player was not disconnected")
 		}
 	}
 

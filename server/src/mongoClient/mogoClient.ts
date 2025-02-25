@@ -5,7 +5,7 @@ const dbName = process.env.MONGODB_DB_NAME || "chess"
 
 export default async function connectMongoDb() {
 	if (!uri) {
-		throw new Error("MONGODB_URI environment variable must be set.")
+		console.error("MONGODB_URI environment variable must be set.")
 	}
 
 	try {

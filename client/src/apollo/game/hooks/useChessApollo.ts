@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from "react"
 import useChessMutations from "./useChessMutations"
-// import useChessSubscriptions, { GameUpdatedResponse, GameUpdatedVariables } from "./useChessSubscriptions"
 import { ChessServerEvent, Move } from "../../../chessGame/types/types"
 import { useSubscription } from "@apollo/client"
 import { GAME_UPDATED_SUBSCRIPTION } from "../queries"
@@ -10,9 +9,13 @@ export interface GameUpdatedVariables {
 	id: string
 }
 
-function useChessApollo<TUpdateData>({ onGameUpdatedData }: { onGameUpdatedData: (data: TUpdateData) => void }) {
-	// const [isSubscribed, setIsSubscribed] = useState<boolean>(false)
-
+function useChessApollo<TUpdateData>({
+	onGameUpdatedData,
+	isSubscribed,
+}: {
+	onGameUpdatedData: (data: TUpdateData) => void
+	isSubscribed: boolean
+}) {
 	const { setItem: setToken } = useLocalStorage("token")
 	const {
 		startGame,
@@ -37,11 +40,12 @@ function useChessApollo<TUpdateData>({ onGameUpdatedData }: { onGameUpdatedData:
 	} = useChessMutations()
 
 	const {
-		restart: gameUpdatedRestart,
 		data: gameUpdatedData,
 		loading: gameUpdatedLoading,
 		error: gameUpdatedError,
-	} = useSubscription<TUpdateData>(GAME_UPDATED_SUBSCRIPTION)
+	} = useSubscription<TUpdateData>(GAME_UPDATED_SUBSCRIPTION, {
+		skip: !isSubscribed,
+	})
 
 	useEffect(() => {
 		if (startGameLoading) {
@@ -105,27 +109,11 @@ function useChessApollo<TUpdateData>({ onGameUpdatedData }: { onGameUpdatedData:
 		}
 	}, [gameUpdatedData, onGameUpdatedData])
 
-	// const stopSubscription = useCallback(() => {
-	// 	setIsSubscribed(false)
-	// }, [setIsSubscribed])
-
-	// const startSubscription = useCallback(() => {
-	// 	setIsSubscribed(true)
-	// 	return stopSubscription
-	// }, [stopSubscription])
-
 	const sendMessage = useCallback(
 		async ({ event, move }: { event: ChessServerEvent; move?: Move }) => {
 			switch (event) {
 				case ChessServerEvent.START_GAME: {
-					const response = await startGame()
-					if (response.data?.startGame?.token) {
-						setToken(response.data.startGame.token)
-						response.data.startGame.token = undefined
-
-						console.log("token reset")
-					}
-					return response
+					return await startGame()
 				}
 				case ChessServerEvent.MAKE_MOVE: {
 					const response = move ? await makeMove({ variables: makeMoveInput({ move }) }) : undefined
@@ -192,7 +180,7 @@ function useChessApollo<TUpdateData>({ onGameUpdatedData }: { onGameUpdatedData:
 		[makeMoveInput, startGame, makeMove, resign, offerDraw, acceptDraw, denyDraw, setToken]
 	)
 
-	return { sendMessage, startSubscription: gameUpdatedRestart }
+	return { sendMessage }
 }
 
 export default useChessApollo

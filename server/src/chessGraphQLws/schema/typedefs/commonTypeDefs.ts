@@ -17,12 +17,10 @@ const commonTypeDefs = `#graphql
 	state: String!
 	moves: [Move!]!
 	drawOffer: String
-	token: String
   }
 
   type GamesArray {
 	games: [Game!]
-	token: String
   }
 
   input MoveInput {

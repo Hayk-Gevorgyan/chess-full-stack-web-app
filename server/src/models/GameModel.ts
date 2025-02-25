@@ -44,7 +44,7 @@ export default class GameModel implements IGameModel {
 
 		// Prevent duplicate waiting.
 		if (this.waitingPlayers.has(username)) {
-			throw new Error(`User ${username} is already waiting for a game.`)
+			console.error(`User ${username} is already waiting for a game.`)
 		}
 
 		// Look for a waiting opponent.

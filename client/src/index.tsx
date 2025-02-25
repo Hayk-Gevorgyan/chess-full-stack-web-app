@@ -36,12 +36,9 @@ const authLink = setContext((_, { headers }) => {
 // This refreshTokenLink inspects HTTP responses for a new token in the "x-refresh-token" header.
 // If a new token is found, it updates localStorage.
 const refreshTokenLink = new ApolloLink((operation, forward) => {
-	console.log("refresh token link")
 	return forward(operation).map((result) => {
 		const { response } = operation.getContext()
-		console.log(response)
 		if (response && response.headers) {
-			console.log(response.headers)
 			const newToken = response.headers.get("x-refresh-token")
 			if (newToken) {
 				console.log("Received new token:", newToken)

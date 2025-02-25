@@ -78,7 +78,7 @@ export default class ChessValidator implements IChessValidator {
 	}
 
 	private isValidMoveWithoutLogging(board: Board, move: Move): boolean {
-		console.log("board")
+		// console.log("board")
 		console.table(board)
 		const from = lnToCoordinates(move.from)
 		if (!from) return false
@@ -96,33 +96,33 @@ export default class ChessValidator implements IChessValidator {
 	}
 
 	public getGameState(turn: PlayerColor, board: Board): GameState {
-		console.log("inside get game state")
-		console.log("turn", turn, "board")
+		// console.log("inside get game state")
+		// console.log("turn", turn, "board")
 		console.table(board)
 		//check for check
 		if (this.isCheck(turn, board)) {
-			console.log("check to", turn)
+			// console.log("check to", turn)
 			//check for checkmate
 			if (!this.hasTurnMoves(turn, board)) {
-				console.log("no moves")
+				// console.log("no moves")
 				const gameState = turn === PlayerColor.WHITE ? GameState.BLACK_WIN : GameState.WHITE_WIN
-				console.log("game ends in", gameState)
+				// console.log("game ends in", gameState)
 				return gameState
 			} else {
-				console.log("check to", turn)
-				console.log("turn moves alailable")
+				// console.log("check to", turn)
+				// console.log("turn moves alailable")
 			}
 		}
 		//check for stalemate
 		else if (!this.hasTurnMoves(turn, board)) {
-			console.log("no check to", turn)
-			console.log("no moves, game ends in stalemate")
+			// console.log("no check to", turn)
+			// console.log("no moves, game ends in stalemate")
 			return GameState.DRAW
 		}
 
-		console.log("no check to", turn)
-		console.log("turn moves available")
-		console.log("gmae continues")
+		// console.log("no check to", turn)
+		// console.log("turn moves available")
+		// console.log("gmae continues")
 
 		return GameState.STARTED
 	}

@@ -10,18 +10,17 @@ const httpTypeDefs = `#graphql
     token: String
   }
 
-  type ReconnectPayload {
+  type AuthenticatePayload {
     error: String
     message: String
     username: String
-    game: Game
     token: String
+    game: Game
   }
 
   type StartGamePayload {
     id: ID!
     game: Game
-    token: String
   }
 
   type Query {
@@ -30,16 +29,16 @@ const httpTypeDefs = `#graphql
   }
 
   type Mutation {
-    reconnect: ReconnectPayload!
+    authenticate: AuthenticatePayload!
     signup(username: String!, password: String!): AuthPayload!
     login(username: String!, password: String!): AuthPayload!
     logout: AuthPayload!
     startGame: StartGamePayload
-    makeMove(move: MoveInput!): String
-    resign: String
-    offerDraw: String
-    acceptDraw: String
-    denyDraw: String
+    makeMove(move: MoveInput!): Boolean
+    resign: Boolean
+    offerDraw: Boolean
+    acceptDraw: Boolean
+    denyDraw: Boolean
   }
 `
 

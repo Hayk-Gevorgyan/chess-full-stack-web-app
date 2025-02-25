@@ -15,18 +15,18 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const navigate = useNavigate()
 	const location = useLocation()
 
-	const { loginCallback, signupCallback, logoutCallback, reconnectCallback } = useAuthMutations()
+	const { loginCallback, signupCallback, logoutCallback, authenticateCallback } = useAuthMutations()
 
-	const reconnect = useCallback(async () => {
+	const authenticate = useCallback(async () => {
 		setUsername(null)
 		setSuccess(null)
 
-		const response = await reconnectCallback()
+		const response = await authenticateCallback()
 
 		const data = response.data
 
-		if (data) {
-			const { error, message, username } = data.reconnect
+		if (data && data.authenticate) {
+			const { error, message, username, token } = data.authenticate
 
 			if (error) {
 				console.log(error)
@@ -38,14 +38,19 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			}
 			if (username) {
 				setUsername(username)
-				setSuccess(message ? message : "Reconnected Successfully")
+				setSuccess(message ? message : "Authenticated Successfully")
+			} else {
+				removeToken()
+			}
+			if (token) {
+				setToken(token)
 			}
 		}
-	}, [reconnectCallback, removeToken])
+	}, [authenticateCallback, removeToken, setToken])
 
 	useEffect(() => {
-		reconnect()
-	}, [reconnect])
+		authenticate()
+	}, [authenticate])
 
 	useEffect(() => {
 		if (username) {
@@ -69,6 +74,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		if (data) {
 			const { error, message, username, token } = data.login
 			if (error) {
+				console.log(error)
 				setLoginError(error)
 				return
 			}
@@ -76,6 +82,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 				setUsername(username)
 				setSuccess(message ? message : "Login Successful")
 				setToken(token)
+			} else {
+				removeToken()
 			}
 		}
 	}
@@ -100,6 +108,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 				setUsername(username)
 				setSuccess(message ? message : "Signup Successful")
 				setToken(token)
+			} else {
+				removeToken()
 			}
 		}
 	}
@@ -115,21 +125,21 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 		const data = response.data
 
-		if (data) {
+		if (data && data.logout) {
 			console.log(data)
+
 			const { error, message } = data.logout
+
 			if (error) {
 				setLogoutError(error)
-			}
-			if (message) {
-				setSuccess(message)
+			} else if (message) {
+				console.log(message)
 			}
 		}
 		console.log("logged out")
 		navigate("/auth")
 		setUsername(null)
 		removeToken()
-		console.log("Logged out successfully")
 	}
 
 	return (

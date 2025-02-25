@@ -38,6 +38,9 @@
 	opacity: 0.8;
 }
 
+.square-valid-move:hover {
+	cursor: pointer;
+}
 .square-attacked {
 	width: calc(100% - 4px);
 	height: calc(100% - 4px);

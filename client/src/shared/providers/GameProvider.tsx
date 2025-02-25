@@ -25,6 +25,8 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	const [myColor, setMyColor] = useState<Color>(Color.WHITE)
 	const [opponent, setOpponent] = useState<string>("opponent")
 	const [opponentColor, setOpponentColor] = useState<Color>(Color.BLACK)
+	const [isSubscribed, setIsSubscribed] = useState<boolean>(false)
+
 	const updatePlayers = useCallback(
 		(white: string, black: string) => {
 			if (username === white) {
@@ -56,14 +58,23 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 				if (drawOffer && drawOffer === opponent) {
 					console.log("opponent offered draw:", opponent)
 					setOpponentOfferedDraw(true)
-				} else setOpponentOfferedDraw(false)
+				} else {
+					setOpponentOfferedDraw(false)
+				}
+				if (state === GameState.BLACK_WIN || state === GameState.DRAW || state === GameState.WHITE_WIN) {
+					setIsSubscribed(() => {
+						console.log("subscription stopped")
+						return false
+					})
+				}
 			}
 		},
 		[updatePlayers, opponent]
 	)
 
-	const { sendMessage, startSubscription } = useChessApollo<GameUpdatedData>({
+	const { sendMessage } = useChessApollo<GameUpdatedData>({
 		onGameUpdatedData: handleGraphQLClientEvent,
+		isSubscribed,
 	})
 
 	const startGame = useCallback(async () => {
@@ -89,10 +100,10 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 					updatePlayers(me, "opponent")
 					setMoves([])
 				}
-				startSubscription()
+				setIsSubscribed(true)
 			}
 		}
-	}, [me, sendMessage, updatePlayers, startSubscription])
+	}, [me, sendMessage, updatePlayers])
 	const offerDraw = useCallback(() => {
 		sendMessage({ event: ChessServerEvent.OFFER_DRAW })
 	}, [sendMessage])
