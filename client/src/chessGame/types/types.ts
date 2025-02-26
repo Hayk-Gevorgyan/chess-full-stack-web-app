@@ -30,7 +30,7 @@ export enum GameState {
 	INVALID_STATE = "invalid-state",
 }
 
-export enum Piece {
+export enum PieceType {
 	PAWN = "p",
 	ROOK = "r",
 	KNIGHT = "n",
@@ -40,7 +40,7 @@ export enum Piece {
 	INVALID_TYPE = "invalid-type",
 }
 
-export enum Color {
+export enum PlayerColor {
 	WHITE = "w",
 	BLACK = "b",
 	INVALID_COLOR = "invalid-color",
@@ -61,8 +61,8 @@ export interface Move {
 }
 
 export interface MoveWrapper extends Move {
-	turn: Color
-	piece: Piece
+	turn: PlayerColor
+	piece: PieceType
 }
 
 export type Board = (string | null)[][]

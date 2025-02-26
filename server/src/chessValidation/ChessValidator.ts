@@ -3,7 +3,7 @@ import {
 	coordinateToLN,
 	getPieceColor,
 	getPieceType,
-	immitateBoardAfterMove,
+	immitateTestBoardAfterMove,
 	lnToCoordinates,
 	oppositeColor,
 } from "../utils/helperFunctions/gameHelperFunctions"
@@ -25,9 +25,9 @@ export default class ChessValidator implements IChessValidator {
 		return this.isLog ? this.isValidMoveWithLogging(board, move) : this.isValidMoveWithoutLogging(board, move)
 	}
 
-	private isCheck(turn: PlayerColor, board: Board): boolean {
-		return this.isLog ? this.isCheckWithLogging(turn, board) : this.isCheckWithoutLogging(turn, board)
-	}
+	// private isCheck(turn: PlayerColor, board: Board): boolean {
+	// 	return this.isLog ? this.isCheckWithLogging(turn, board) : this.isCheckWithoutLogging(turn, board)
+	// }
 
 	private hasTurnMoves(turn: PlayerColor, board: Board): boolean {
 		return this.isLog ? this.hasTurnMovesWithLogging(turn, board) : this.hasTurnMovesWithoutLogging(turn, board)
@@ -78,13 +78,18 @@ export default class ChessValidator implements IChessValidator {
 	}
 
 	private isValidMoveWithoutLogging(board: Board, move: Move): boolean {
-		// console.log("board")
 		console.table(board)
 		const from = lnToCoordinates(move.from)
-		if (!from) return false
+		if (!from) {
+			console.log("no from")
+			return false
+		}
 		const [fromX, fromY] = from
 		const piece = board[fromY][fromX]
-		if (!piece) return false
+		if (!piece) {
+			console.log("no piece")
+			return false
+		}
 		const turn: PlayerColor = getPieceColor(piece) === PlayerColor.WHITE ? PlayerColor.WHITE : PlayerColor.BLACK
 
 		const turnMoves: Move[] = this.getTurnMoves(turn, board)
@@ -145,7 +150,7 @@ export default class ChessValidator implements IChessValidator {
 
 	private getKingMovesWithLogging = logFunctionExecution(this.getKingMovesWithoutLogging)
 
-	private isCheckWithLogging = logFunctionExecution(this.isCheckWithoutLogging)
+	// private isCheckWithLogging = logFunctionExecution(this.isCheckWithoutLogging)
 
 	private getKingPositionWithLogging = logFunctionExecution(this.getKingPositionWithoutLogging)
 
@@ -191,7 +196,7 @@ export default class ChessValidator implements IChessValidator {
 
 		//return moves after which check doesnt occure to own king
 		return moves.filter((m) => {
-			const newBoard = immitateBoardAfterMove(board, m)
+			const newBoard = immitateTestBoardAfterMove(board, m)
 			if (!newBoard) return false
 			return !this.isCheck(turn, newBoard)
 		})
@@ -207,7 +212,7 @@ export default class ChessValidator implements IChessValidator {
 					case PieceType.PAWN:
 						if (
 							this.getPawnMoves(x, y, turn, board).some((m) => {
-								const newBoard = immitateBoardAfterMove(board, m)
+								const newBoard = immitateTestBoardAfterMove(board, m)
 								if (!newBoard) return false
 								return !this.isCheck(turn, newBoard)
 							})
@@ -217,7 +222,7 @@ export default class ChessValidator implements IChessValidator {
 					case PieceType.ROOK:
 						if (
 							this.getRookMoves(x, y, turn, board).some((m) => {
-								const newBoard = immitateBoardAfterMove(board, m)
+								const newBoard = immitateTestBoardAfterMove(board, m)
 								if (!newBoard) return false
 								return !this.isCheck(turn, newBoard)
 							})
@@ -227,7 +232,7 @@ export default class ChessValidator implements IChessValidator {
 					case PieceType.KNIGHT:
 						if (
 							this.getKnightMoves(x, y, turn, board).some((m) => {
-								const newBoard = immitateBoardAfterMove(board, m)
+								const newBoard = immitateTestBoardAfterMove(board, m)
 								if (!newBoard) return false
 								return !this.isCheck(turn, newBoard)
 							})
@@ -237,7 +242,7 @@ export default class ChessValidator implements IChessValidator {
 					case PieceType.BISHOP:
 						if (
 							this.getBishopMoves(x, y, turn, board).some((m) => {
-								const newBoard = immitateBoardAfterMove(board, m)
+								const newBoard = immitateTestBoardAfterMove(board, m)
 								if (!newBoard) return false
 								return !this.isCheck(turn, newBoard)
 							})
@@ -247,7 +252,7 @@ export default class ChessValidator implements IChessValidator {
 					case PieceType.QUEEN:
 						if (
 							this.getQueenMoves(x, y, turn, board).some((m) => {
-								const newBoard = immitateBoardAfterMove(board, m)
+								const newBoard = immitateTestBoardAfterMove(board, m)
 								if (!newBoard) return false
 								return !this.isCheck(turn, newBoard)
 							})
@@ -257,7 +262,7 @@ export default class ChessValidator implements IChessValidator {
 					case PieceType.KING:
 						if (
 							this.getKingMoves(x, y, turn, board).some((m) => {
-								const newBoard = immitateBoardAfterMove(board, m)
+								const newBoard = immitateTestBoardAfterMove(board, m)
 								if (!newBoard) return false
 								return !this.isCheck(turn, newBoard)
 							})
@@ -286,7 +291,10 @@ export default class ChessValidator implements IChessValidator {
 		const opponentColor = oppositeColor(playerColor)
 		const from = coordinateToLN([fromX, fromY])
 
-		if (fromX === lastRow) return moves
+		if (fromY === lastRow) {
+			// console.log("fromX", fromX, "lastRow", lastRow)
+			return moves
+		}
 		if (from) {
 			const toSquare = board[fromY + direction][fromX]
 			const to = coordinateToLN([fromX, fromY + direction])
@@ -556,7 +564,7 @@ export default class ChessValidator implements IChessValidator {
 		return moves
 	}
 
-	private getKingMovesWithoutLogging(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
+	private getKingOneSquareMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
 		let moves: any[] = []
 
 		if (fromX == null || fromY == null || !playerColor || !board) {
@@ -596,7 +604,102 @@ export default class ChessValidator implements IChessValidator {
 		return moves
 	}
 
-	private isCheckWithoutLogging(checkedColor: PlayerColor, board: Board): boolean {
+	private getKingMovesWithoutLogging(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
+		let moves: any[] = []
+
+		if (fromX == null || fromY == null || !playerColor || !board) {
+			return moves
+		}
+
+		const from = coordinateToLN([fromX, fromY])
+
+		if (!from) return []
+
+		moves.push(...this.getKingOneSquareMoves(fromX, fromY, playerColor, board))
+
+		// ----------------------
+		// CASTLING LOGIC BELOW
+		// ----------------------
+		// We assume that if the king is still on its original square, it hasn't moved.
+		// (In a complete implementation you would track move history or castling rights separately.)
+		if (playerColor === PlayerColor.WHITE && from === "e1" && !this.isCheck(playerColor, board)) {
+			// White kingside castling (King: e1 -> g1, Rook: h1 -> f1)
+			// Ensure squares f1 ([5,7]) and g1 ([6,7]) are empty
+			if (board[7][5] === null && board[7][6] === null) {
+				const kingsideRook = board[7][7]
+				if (kingsideRook && getPieceType(kingsideRook) === PieceType.ROOK && getPieceColor(kingsideRook) === PlayerColor.WHITE) {
+					// Verify that the king does not pass through or land on an attacked square.
+					const boardAfterF1 = immitateTestBoardAfterMove(board, { from, to: "f1" })
+					const boardAfterG1 = immitateTestBoardAfterMove(board, { from, to: "g1" })
+					if (
+						boardAfterF1 &&
+						boardAfterG1 &&
+						!this.isCheck(playerColor, boardAfterF1) &&
+						!this.isCheck(playerColor, boardAfterG1)
+					) {
+						moves.push({ from, to: "g1" })
+					}
+				}
+			}
+
+			// White queenside castling (King: e1 -> c1, Rook: a1 -> d1)
+			// Ensure squares between king and rook are empty: d1 ([3,7]), c1 ([2,7]), and b1 ([1,7])
+			if (board[7][3] === null && board[7][2] === null && board[7][1] === null) {
+				const queensideRook = board[7][0]
+				if (queensideRook && getPieceType(queensideRook) === PieceType.ROOK && getPieceColor(queensideRook) === PlayerColor.WHITE) {
+					const boardAfterD1 = immitateTestBoardAfterMove(board, { from, to: "d1" })
+					const boardAfterC1 = immitateTestBoardAfterMove(board, { from, to: "c1" })
+					if (
+						boardAfterD1 &&
+						boardAfterC1 &&
+						!this.isCheck(playerColor, boardAfterD1) &&
+						!this.isCheck(playerColor, boardAfterC1)
+					) {
+						moves.push({ from, to: "c1" })
+					}
+				}
+			}
+		} else if (playerColor === PlayerColor.BLACK && from === "e8" && !this.isCheck(playerColor, board)) {
+			// Black kingside castling (King: e8 -> g8, Rook: h8 -> f8)
+			// In our board, black's back rank is row 0.
+			if (board[0][5] === null && board[0][6] === null) {
+				const kingsideRook = board[0][7]
+				if (kingsideRook && getPieceType(kingsideRook) === PieceType.ROOK && getPieceColor(kingsideRook) === PlayerColor.BLACK) {
+					const boardAfterF8 = immitateTestBoardAfterMove(board, { from, to: "f8" })
+					const boardAfterG8 = immitateTestBoardAfterMove(board, { from, to: "g8" })
+					if (
+						boardAfterF8 &&
+						boardAfterG8 &&
+						!this.isCheck(playerColor, boardAfterF8) &&
+						!this.isCheck(playerColor, boardAfterG8)
+					) {
+						moves.push({ from, to: "g8" })
+					}
+				}
+			}
+
+			// Black queenside castling (King: e8 -> c8, Rook: a8 -> d8)
+			if (board[0][1] === null && board[0][2] === null && board[0][3] === null) {
+				const queensideRook = board[0][0]
+				if (queensideRook && getPieceType(queensideRook) === PieceType.ROOK && getPieceColor(queensideRook) === PlayerColor.BLACK) {
+					const boardAfterD8 = immitateTestBoardAfterMove(board, { from, to: "d8" })
+					const boardAfterC8 = immitateTestBoardAfterMove(board, { from, to: "c8" })
+					if (
+						boardAfterD8 &&
+						boardAfterC8 &&
+						!this.isCheck(playerColor, boardAfterD8) &&
+						!this.isCheck(playerColor, boardAfterC8)
+					) {
+						moves.push({ from, to: "c8" })
+					}
+				}
+			}
+		}
+
+		return moves
+	}
+
+	private isCheck(checkedColor: PlayerColor, board: Board): boolean {
 		const checkedKingPosition = this.getKingPosition(checkedColor, board)
 		if (!checkedKingPosition) return false
 		const opponentColor = oppositeColor(checkedColor)
@@ -649,7 +752,7 @@ export default class ChessValidator implements IChessValidator {
 						break
 					case PieceType.KING:
 						if (
-							this.getKingMoves(x, y, opponentColor, board).some((m) => {
+							this.getKingOneSquareMoves(x, y, opponentColor, board).some((m) => {
 								return m.to === checkedKingPosition
 							})
 						)

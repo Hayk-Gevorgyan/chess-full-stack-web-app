@@ -1,20 +1,29 @@
 import { BaseContext } from "@apollo/server"
-import { IUserModel } from "../models/UserModel"
-import { User } from "../types/types"
+import { IUserModel } from "../../models/UserModel"
+import { User } from "../../types/types"
 import { Request, Response } from "express"
 import jwt, { JwtPayload } from "jsonwebtoken"
-import { AuthPayload } from "./schema/resolvers/httpResolvers"
+import { AuthPayload } from "../schema/resolvers/httpResolvers"
 
 export interface AuthContext extends BaseContext {
 	user?: User
 }
 
+/**
+ * AuthController manages user authentication, including token generation,
+ * verification, and user signup/login operations.
+ */
 export default class AuthController {
 	private static readonly JWT_SECRET = "very secret token"
 	private static readonly EXPIRATION_TIME = "30d"
 	private userModel: IUserModel
 	private static _instance: AuthController | undefined = undefined
 
+	/**
+	 * Constructs a new AuthController instance. Implements the singleton pattern.
+	 *
+	 * @param userModel - An instance of IUserModel for user data management.
+	 */
 	constructor(userModel: IUserModel) {
 		this.userModel = userModel
 		if (AuthController._instance) {
@@ -24,6 +33,12 @@ export default class AuthController {
 		return AuthController._instance
 	}
 
+	/**
+	 * Generates a JWT token for a given user.
+	 *
+	 * @param user - The user object containing username.
+	 * @returns A JWT token string.
+	 */
 	signToken(user: User) {
 		return jwt.sign({ username: user.username }, AuthController.JWT_SECRET, { expiresIn: AuthController.EXPIRATION_TIME })
 	}
@@ -34,6 +49,7 @@ export default class AuthController {
 	 *
 	 * @param req - The Express request, if available.
 	 * @param connectionParams - The connection parameters from the WS connection.
+	 * @param res - The Express response, if available for setting headers.
 	 * @returns An object containing a `user` property if token is valid.
 	 */
 	async getAuthContext({
@@ -69,16 +85,8 @@ export default class AuthController {
 			// Remove any surrounding quotes from the token if present
 			token = token.replace(/^"(.*)"$/, "$1")
 
-			// const decoded = jwt.decode(token) as JwtPayload
-
-			// const username = decoded.username
-
-			// if (username) {
-			// 	this.userModel.findUser(username).then()
-			// }
 			try {
 				const decoded = jwt.verify(token, AuthController.JWT_SECRET) as JwtPayload
-				// console.log("decoded", decoded)
 				user = { username: decoded.username as string }
 			} catch (error) {
 				if (error instanceof jwt.TokenExpiredError) {
@@ -106,7 +114,6 @@ export default class AuthController {
 
 						// Only set the header if we're in an HTTP request (i.e. res is available)
 						if (res) {
-							// console.log("refresh token set", newToken)
 							res.setHeader("x-refresh-token", newToken)
 						}
 					}
@@ -119,6 +126,14 @@ export default class AuthController {
 		return { user }
 	}
 
+	/**
+	 * Handles user signup, creating a new user and generating a JWT token.
+	 *
+	 * @param username - The username of the new user.
+	 * @param password - The password of the new user.
+	 * @param authPayload - An object to hold the result of the signup operation.
+	 * @returns An AuthPayload object containing the result of the signup.
+	 */
 	async signup(username: string, password: string, authPayload: AuthPayload) {
 		// Check if user already exists
 		if (await this.userModel.findUser(username)) {
@@ -132,8 +147,6 @@ export default class AuthController {
 		// Sign a JWT token
 		const token = this.signToken(user)
 
-		// console.log("signup token", token)
-
 		authPayload.message = "User created successfully"
 		authPayload.username = user.username
 		authPayload.token = token
@@ -141,6 +154,14 @@ export default class AuthController {
 		return authPayload
 	}
 
+	/**
+	 * Handles user login, validating credentials and generating a JWT token.
+	 *
+	 * @param username - The username of the user.
+	 * @param password - The password of the user.
+	 * @param authPayload - An object to hold the result of the login operation.
+	 * @returns An AuthPayload object containing the result of the login.
+	 */
 	async login(username: string, password: string, authPayload: AuthPayload) {
 		const user = await this.userModel.findUser(username)
 		if (!user) {
@@ -155,10 +176,7 @@ export default class AuthController {
 			return authPayload
 		}
 
-		// console.log("Signing payload:", { id: user.id, username: user.username })
 		const token = this.signToken(user)
-
-		// console.log("login token", token)
 
 		authPayload.message = "Login successful"
 		authPayload.username = user.username

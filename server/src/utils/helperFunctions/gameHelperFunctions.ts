@@ -14,12 +14,12 @@ export function initialBoardSetup(): Board {
 export function boardAfterMoves(moves: Move[]): Board {
 	let derivedBoard: Board = initialBoardSetup()
 	moves.forEach((move) => {
-		derivedBoard = immitateBoardAfterMove(derivedBoard, move)
+		derivedBoard = immitateTestBoardAfterMove(derivedBoard, move)
 	})
 	return derivedBoard
 }
 
-export function immitateBoardAfterMove(board: Board, move: Move): Board {
+export function immitateTestBoardAfterMove(board: Board, move: Move): Board {
 	const from = lnToCoordinates(move.from)
 	const to = lnToCoordinates(move.to)
 	if (!from || !to) {
@@ -32,6 +32,54 @@ export function immitateBoardAfterMove(board: Board, move: Move): Board {
 	const piece = move.promotion ? move.promotion : board[fromY][fromX]
 	newBoard[toY][toX] = piece
 	newBoard[fromY][fromX] = null
+	return newBoard
+}
+
+export function immitateFinalBoardAfterMove(board: Board, move: Move): Board {
+	const from = lnToCoordinates(move.from)
+	const to = lnToCoordinates(move.to)
+	if (!from || !to) {
+		console.error("Invalid move coordinates")
+		return initialBoardSetup()
+	}
+	const [fromX, fromY] = from
+	const [toX, toY] = to
+	const newBoard: Board = board.map((row) => row.slice())
+	const piece = move.promotion ? move.promotion : board[fromY][fromX]
+
+	newBoard[toY][toX] = piece
+	newBoard[fromY][fromX] = null
+
+	if (piece && getPieceType(piece) === PieceType.KING) {
+		let rookFrom: [number, number] | undefined
+		let rookTo: [number, number] | undefined
+		if (move.from === "e1") {
+			if (move.to === "g1") {
+				rookFrom = lnToCoordinates("h1")
+				rookTo = lnToCoordinates("f1")
+			} else if (move.to === "c1") {
+				rookFrom = lnToCoordinates("a1")
+				rookTo = lnToCoordinates("d1")
+			}
+		} else if (move.from === "e8") {
+			if (move.to === "g8") {
+				rookFrom = lnToCoordinates("h8")
+				rookTo = lnToCoordinates("f8")
+			} else if (move.to === "c8") {
+				rookFrom = lnToCoordinates("a8")
+				rookTo = lnToCoordinates("d8")
+			}
+		}
+		if (rookFrom && rookTo) {
+			const [rookFromX, rookFromY] = rookFrom
+			const [rookToX, rookToY] = rookTo
+
+			const rook = board[rookFromY][rookFromX]
+
+			newBoard[rookToY][rookToX] = rook
+			newBoard[rookFromY][rookFromX] = null
+		}
+	}
 	return newBoard
 }
 

@@ -1,8 +1,8 @@
-import { Color } from "../types/types"
+import { PlayerColor } from "../types/types"
 import ColorBlock from "./ColorBlock"
 
 interface PlayerBlockParams {
-	color: Color
+	color: PlayerColor
 	username: string
 }
 const PlayerBlock = ({ color, username }: PlayerBlockParams) => {

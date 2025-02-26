@@ -9,7 +9,9 @@ const AuthPage = () => {
 	// State to toggle between login and signup views.
 	const [showLogin, setShowLogin] = useState(true)
 
-	// Toggle function to switch views.
+	/**
+	 * Toggle function to switch views.
+	 */
 	const toggleAuthMode = () => {
 		setShowLogin((prevMode) => !prevMode)
 	}

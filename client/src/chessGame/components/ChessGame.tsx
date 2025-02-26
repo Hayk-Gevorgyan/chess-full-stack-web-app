@@ -1,6 +1,6 @@
 import classNames from "classnames"
 import ChessBoard from "./ChessBoard"
-import { Color } from "../types/types"
+import { PlayerColor } from "../types/types"
 import NumbersPanel from "./NumbersPanel"
 import LettersPanel from "./LettersPanel"
 import ChessGameSidePanel from "./ChessGameSidePanel"
@@ -33,7 +33,7 @@ const ChessGame = () => {
 			{opponent && opponentColor ? (
 				<PlayerBlock color={opponentColor} username={opponent} />
 			) : (
-				<PlayerBlock color={Color.BLACK} username="waiting..." />
+				<PlayerBlock color={PlayerColor.BLACK} username="waiting..." />
 			)}
 			<div className={chessBoardClassName}>
 				<NumbersPanel />
@@ -52,7 +52,11 @@ const ChessGame = () => {
 				</div>
 				<ChessGameSidePanel turn={turn} />
 			</div>
-			{me && myColor ? <PlayerBlock color={myColor} username={me} /> : <PlayerBlock color={Color.WHITE} username={"username"} />}
+			{me && myColor ? (
+				<PlayerBlock color={myColor} username={me} />
+			) : (
+				<PlayerBlock color={PlayerColor.WHITE} username={"username"} />
+			)}
 		</div>
 	)
 }

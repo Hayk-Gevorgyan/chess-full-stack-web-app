@@ -1,4 +1,4 @@
-import { MoveWrapper, Piece } from "../types/types"
+import { MoveWrapper, PieceType } from "../types/types"
 import PieceComponent from "./Piece"
 import classNames from "classnames"
 import "../styles/PromotionPanel.css"
@@ -10,9 +10,9 @@ export default function PromotionPanel({
 	onSelect,
 }: {
 	promotionInfo: MoveWrapper | undefined
-	onSelect: (promotion: Piece) => void
+	onSelect: (promotion: PieceType) => void
 }) {
-	const pieces = useMemo(() => [Piece.QUEEN, Piece.ROOK, Piece.BISHOP, Piece.KNIGHT], [])
+	const pieces = useMemo(() => [PieceType.QUEEN, PieceType.ROOK, PieceType.BISHOP, PieceType.KNIGHT], [])
 
 	const toCoordinate = useMemo(() => {
 		if (promotionInfo) {

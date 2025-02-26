@@ -1,6 +1,6 @@
 // src/graphql/resolvers/httpResolvers.ts
 import { Game, Move } from "../../../types/types"
-import { AuthContext } from "../../AuthController"
+import { AuthContext } from "../../controllers/AuthController"
 import { authController, gameController } from "../../../../index"
 
 export interface AuthPayload {

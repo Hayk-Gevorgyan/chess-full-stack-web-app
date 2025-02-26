@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react"
 // import useWebsocket from "../../shared/hooks/useWebsocket" // Assuming you have this custom hook
-import { initialBoardSetup, getPieceAt, getPieceColor, getPieceType } from "../chessValidation/helperFunctions"
-import { isCheck, getTurnMoves, immitateBoardAfterMove, isPromotion } from "../chessValidation/chessValidator"
-import { GameState, Move, MoveWrapper, Board, Color, Piece } from "../types/types"
+import { initialBoardSetup, getPieceAt, getPieceColor, getPieceType, immitateFinalBoardAfterMove } from "../chessValidation/helperFunctions"
+import { isCheck, getTurnMoves, isPromotion } from "../chessValidation/chessValidator"
+import { GameState, Move, MoveWrapper, Board, PlayerColor, PieceType } from "../types/types"
 import { useGameContext } from "../../shared/hooks/useGameContext"
 
 export function useChessGame() {
@@ -13,14 +13,19 @@ export function useChessGame() {
 	const board = useMemo<Board>(() => {
 		let derivedBoard: Board = initialBoardSetup()
 		moves.forEach((move) => {
-			derivedBoard = immitateBoardAfterMove(derivedBoard, move)
+			derivedBoard = immitateFinalBoardAfterMove(derivedBoard, move)
 		})
 		return derivedBoard
 	}, [moves])
 
-	const turn = useMemo<Color>(() => (moves.length % 2 === 0 ? Color.WHITE : Color.BLACK), [moves])
+	const turn = useMemo<PlayerColor>(() => (moves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK), [moves])
 
-	const turnMoves = useMemo<MoveWrapper[]>(() => getTurnMoves(turn, board), [turn, board])
+	const turnMoves = useMemo<MoveWrapper[]>(() => {
+		const moves = getTurnMoves(turn, board)
+		console.log("turn moves")
+		console.table(moves)
+		return moves
+	}, [turn, board])
 
 	const pieceMoves = useMemo<MoveWrapper[]>(() => turnMoves.filter((move) => move.from === selectedSquare), [selectedSquare, turnMoves])
 
@@ -38,14 +43,21 @@ export function useChessGame() {
 	}, [selectedSquare])
 
 	useEffect(() => {
-		if (myColor === Color.WHITE) {
+		if (myColor === PlayerColor.WHITE) {
 			setIsBoardFlipped(false)
 		}
-		if (myColor === Color.BLACK) {
+		if (myColor === PlayerColor.BLACK) {
 			setIsBoardFlipped(true)
 		}
 	}, [myColor])
 
+	/**
+	 * Handles a click on a coordinate if the game state is started.
+	 * If no selected square is defined and the piece belongs to the player clicking on the square, sets the selected square to the coordinate.
+	 * If selected square is defined and the coordinates are the same sets the selected square to undefined, otherwise takes the piece from the board and if the piece is of the same color sets the selected square to coordinate,
+	 * otherwise takes the slected piece from the board and checks if the other square is a valid move of the selected piece and is it a promotion.
+	 * If its a promotion the promotion info is set to that valid moves which calls promotion handler, after that the move is sent to the server
+	 */
 	const handleSquareClick = useCallback(
 		(coordinate: string) => {
 			if (gameState !== GameState.STARTED) return
@@ -93,8 +105,11 @@ export function useChessGame() {
 		[gameState, selectedSquare, board, myColor, turnMoves, setSelectedSquare, makeMove]
 	)
 
+	/**
+	 * takes a piece and sets the promotionInfo.promotion to that if piece type is present
+	 */
 	const handlePromotionSelect = useCallback(
-		(promotion: Piece) => {
+		(promotion: PieceType) => {
 			setSelectedSquare(undefined)
 			if (!promotionInfo) return
 			if (promotion) {
@@ -105,6 +120,7 @@ export function useChessGame() {
 				}
 				makeMove(move)
 			}
+			setPromotionInfo(undefined)
 		},
 		[promotionInfo, makeMove]
 	)

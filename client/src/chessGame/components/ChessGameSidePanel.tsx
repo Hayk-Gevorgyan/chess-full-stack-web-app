@@ -1,9 +1,9 @@
-import { Color } from "../types/types"
+import { PlayerColor } from "../types/types"
 import Controls from "./Controls"
 import ColorBlock from "./ColorBlock"
 
 interface ChessGameSidePanelProps {
-	turn: Color
+	turn: PlayerColor
 }
 
 const ChessGameSidePanel = ({ turn }: ChessGameSidePanelProps) => {

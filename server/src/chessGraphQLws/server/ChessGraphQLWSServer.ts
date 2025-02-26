@@ -6,11 +6,10 @@ import cors from "cors"
 import { Server } from "http"
 import { WebSocketServer } from "ws"
 import { useServer } from "graphql-ws/lib/use/ws"
-import { httpSchema, subscriptionsSchema } from "./schema/ChessGraphQLSchema"
+import { httpSchema, subscriptionsSchema } from "../schema/ChessGraphQLSchema"
 import { GraphQLSchema } from "graphql"
-import AuthController, { AuthContext } from "./AuthController"
-import GameController from "./GameController"
-import { Db } from "mongodb"
+import AuthController, { AuthContext } from "../controllers/AuthController"
+import GameController from "../controllers/GameController"
 
 /**
  * Class representing the GraphQL server (HTTP and subscriptions) with integrated authentication.

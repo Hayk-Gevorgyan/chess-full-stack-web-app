@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
 import { GameContext } from "../contexts/GameContext"
-import { ChessServerEvent, Color, GameState, Move } from "../../chessGame/types/types"
+import { ChessServerEvent, PlayerColor, GameState, Move } from "../../chessGame/types/types"
 import { useAuthContext } from "../hooks/useAuthContext"
 import useChessApollo from "../../apollo/game/hooks/useChessApollo"
 
@@ -22,24 +22,24 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	const [opponentOfferedDraw, setOpponentOfferedDraw] = useState<boolean>(false)
 	const [gameState, setGameState] = useState<GameState>(GameState.WAITING)
 	const [me, setMe] = useState<string>(username ? username : "username")
-	const [myColor, setMyColor] = useState<Color>(Color.WHITE)
+	const [myColor, setMyColor] = useState<PlayerColor>(PlayerColor.WHITE)
 	const [opponent, setOpponent] = useState<string>("opponent")
-	const [opponentColor, setOpponentColor] = useState<Color>(Color.BLACK)
+	const [opponentColor, setOpponentColor] = useState<PlayerColor>(PlayerColor.BLACK)
 	const [isSubscribed, setIsSubscribed] = useState<boolean>(false)
 
 	const updatePlayers = useCallback(
 		(white: string, black: string) => {
 			if (username === white) {
 				setMe(white)
-				setMyColor(Color.WHITE)
+				setMyColor(PlayerColor.WHITE)
 				setOpponent(black)
-				setOpponentColor(Color.BLACK)
+				setOpponentColor(PlayerColor.BLACK)
 			}
 			if (username === black) {
 				setMe(black)
-				setMyColor(Color.BLACK)
+				setMyColor(PlayerColor.BLACK)
 				setOpponent(white)
-				setOpponentColor(Color.WHITE)
+				setOpponentColor(PlayerColor.WHITE)
 			}
 		},
 		[username]

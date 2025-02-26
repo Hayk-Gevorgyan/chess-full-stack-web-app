@@ -1,8 +1,8 @@
 import React, { useMemo } from "react"
-import { Color } from "../types/types"
+import { PlayerColor } from "../types/types"
 
-const ColorBlock = ({ color }: { color: Color }) => {
-	const bgColor = useMemo<"white" | "black">(() => (color === Color.WHITE ? "white" : "black"), [color])
+const ColorBlock = ({ color }: { color: PlayerColor }) => {
+	const bgColor = useMemo<"white" | "black">(() => (color === PlayerColor.WHITE ? "white" : "black"), [color])
 	const colorBlockStyle = {
 		backgroundColor: bgColor,
 	}

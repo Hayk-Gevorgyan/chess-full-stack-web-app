@@ -4,11 +4,11 @@ import http from "http"
 import dotenv from "dotenv"
 import connectMongoDb from "./src/mongoClient/mogoClient"
 
-import ChessGraphQLWSServer from "./src/chessGraphQLws/ChessGraphQLWSServer"
+import ChessGraphQLWSServer from "./src/chessGraphQLws/server/ChessGraphQLWSServer"
 import UserModel from "./src/models/UserModel"
 import GameModel from "./src/models/GameModel"
-import AuthController from "./src/chessGraphQLws/AuthController"
-import GameController from "./src/chessGraphQLws/GameController"
+import AuthController from "./src/chessGraphQLws/controllers/AuthController"
+import GameController from "./src/chessGraphQLws/controllers/GameController"
 import ChessValidator from "./src/chessValidation/ChessValidator"
 
 dotenv.config()
@@ -30,6 +30,9 @@ server.listen(PORT, () => {
 let authController: AuthController
 let gameController: GameController
 
+/**
+ * Initiates the server
+ */
 async function init() {
 	const db = await connectMongoDb()
 	if (!db) {

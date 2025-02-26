@@ -1,5 +1,5 @@
 import { createContext } from "react"
-import { ChessClientEvent, Color, GameState, Move } from "../../chessGame/types/types"
+import { ChessClientEvent, PlayerColor, GameState, Move } from "../../chessGame/types/types"
 
 export interface ChessWebSocketMessage {
 	event: ChessClientEvent
@@ -9,9 +9,9 @@ export interface ChessWebSocketMessage {
 export interface GameContextProps {
 	id: string | undefined
 	me: string
-	myColor: Color
+	myColor: PlayerColor
 	opponent: string
-	opponentColor: Color
+	opponentColor: PlayerColor
 	moves: Move[]
 	gameState: GameState
 	opponentOfferedDraw: boolean

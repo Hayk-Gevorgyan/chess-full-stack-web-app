@@ -109,6 +109,12 @@ function useChessApollo<TUpdateData>({
 		}
 	}, [gameUpdatedData, onGameUpdatedData])
 
+	/**
+	 * Sends a message to the server based on the event and move(optional) properties
+	 * @param event the event to send
+	 * @param move the move to send for the respective event
+	 * @returns a fetch result for the corresponding event
+	 */
 	const sendMessage = useCallback(
 		async ({ event, move }: { event: ChessServerEvent; move?: Move }) => {
 			switch (event) {

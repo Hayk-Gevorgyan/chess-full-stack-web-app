@@ -128,21 +128,28 @@ export default class GameModel implements IGameModel {
 	 * @returns the move if valid, otherwise null
 	 */
 	private async makeMove(gameId: string, username: string, move: Move): Promise<Move | null> {
+		console.log("making move", move)
 		const game = await this.findActiveGameById(gameId)
 		if (game) {
 			const turnColor = game.moves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
 			const board = boardAfterMoves(game.moves)
+			console.log("turn", turnColor)
 			if (!this.validator.validateMove(board, move)) {
+				console.log("move not valid")
 				return null
 			}
+			console.log("move valid")
 			const turnPlayer = turnColor === PlayerColor.WHITE ? game.white : game.black
 			if (turnPlayer !== username) {
+				console.log("not right player")
 				return null
 			}
+			console.log("right player")
 			// Use the shared registerMove function.
 			await this.registerMove(game, move)
 			return move
 		}
+		console.log("move not made")
 		return null
 	}
 

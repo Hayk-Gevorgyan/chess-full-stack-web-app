@@ -1,5 +1,5 @@
 // src/graphql/resolvers/subscriptionResolvers.ts
-import { AuthContext } from "../../AuthController"
+import { AuthContext } from "../../controllers/AuthController"
 import { gameController } from "../../../../index"
 import { GraphQLError } from "graphql"
 
