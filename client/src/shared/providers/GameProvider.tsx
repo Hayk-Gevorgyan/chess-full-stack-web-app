@@ -47,7 +47,6 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 
 	const handleGraphQLClientEvent = useCallback(
 		(data: GameUpdatedData) => {
-			console.log("handling game updated data", data)
 			const { gameUpdated } = data
 			if (gameUpdated) {
 				const { white, black, state, moves, drawOffer } = gameUpdated
@@ -56,14 +55,12 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 				setMoves(moves)
 				updatePlayers(white, black)
 				if (drawOffer && drawOffer === opponent) {
-					console.log("opponent offered draw:", opponent)
 					setOpponentOfferedDraw(true)
 				} else {
 					setOpponentOfferedDraw(false)
 				}
 				if (state === GameState.BLACK_WIN || state === GameState.DRAW || state === GameState.WHITE_WIN) {
 					setIsSubscribed(() => {
-						console.log("subscription stopped")
 						return false
 					})
 				}
@@ -80,7 +77,6 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	const startGame = useCallback(async () => {
 		const response = await sendMessage({ event: ChessServerEvent.START_GAME })
 		const data = response?.data
-		console.log("data received", response)
 		if (data) {
 			if (data.startGame) {
 				setId(data.startGame?.id)

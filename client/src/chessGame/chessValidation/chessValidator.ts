@@ -617,9 +617,7 @@ export function isPromotion(move: MoveWrapper): boolean {
 		const toY = toCoordinates[1]
 		const lastRow = move.turn === PlayerColor.WHITE ? 0 : 7
 
-		console.log({ toY, lastRow })
 		return toY === lastRow
 	}
-	console.log("no promotion at", move.to, toCoordinates, "for piece", move.piece)
 	return false
 }

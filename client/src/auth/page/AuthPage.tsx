@@ -17,7 +17,7 @@ const AuthPage = () => {
 	}
 
 	return (
-		<div className="auth-page-container">
+		<div className="page-container">
 			<NavBar />
 			<div className="content">
 				<Header name="Authenticate" />

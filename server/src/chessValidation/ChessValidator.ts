@@ -78,16 +78,13 @@ export default class ChessValidator implements IChessValidator {
 	}
 
 	private isValidMoveWithoutLogging(board: Board, move: Move): boolean {
-		console.table(board)
 		const from = lnToCoordinates(move.from)
 		if (!from) {
-			console.log("no from")
 			return false
 		}
 		const [fromX, fromY] = from
 		const piece = board[fromY][fromX]
 		if (!piece) {
-			console.log("no piece")
 			return false
 		}
 		const turn: PlayerColor = getPieceColor(piece) === PlayerColor.WHITE ? PlayerColor.WHITE : PlayerColor.BLACK
@@ -101,33 +98,18 @@ export default class ChessValidator implements IChessValidator {
 	}
 
 	public getGameState(turn: PlayerColor, board: Board): GameState {
-		// console.log("inside get game state")
-		// console.log("turn", turn, "board")
-		console.table(board)
 		//check for check
 		if (this.isCheck(turn, board)) {
-			// console.log("check to", turn)
 			//check for checkmate
 			if (!this.hasTurnMoves(turn, board)) {
-				// console.log("no moves")
 				const gameState = turn === PlayerColor.WHITE ? GameState.BLACK_WIN : GameState.WHITE_WIN
-				// console.log("game ends in", gameState)
 				return gameState
-			} else {
-				// console.log("check to", turn)
-				// console.log("turn moves alailable")
 			}
 		}
 		//check for stalemate
 		else if (!this.hasTurnMoves(turn, board)) {
-			// console.log("no check to", turn)
-			// console.log("no moves, game ends in stalemate")
 			return GameState.DRAW
 		}
-
-		// console.log("no check to", turn)
-		// console.log("turn moves available")
-		// console.log("gmae continues")
 
 		return GameState.STARTED
 	}
@@ -292,7 +274,6 @@ export default class ChessValidator implements IChessValidator {
 		const from = coordinateToLN([fromX, fromY])
 
 		if (fromY === lastRow) {
-			// console.log("fromX", fromX, "lastRow", lastRow)
 			return moves
 		}
 		if (from) {

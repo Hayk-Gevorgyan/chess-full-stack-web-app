@@ -21,6 +21,8 @@ const ChessGame = () => {
 		checkedSquare,
 		handlePromotionSelect,
 		handleSquareClick,
+		handleDragStart,
+		handleDrop,
 	} = useChessGame()
 
 	const { me, myColor, opponent, opponentColor } = useGameContext()
@@ -45,6 +47,8 @@ const ChessGame = () => {
 							checkedSquare={checkedSquare}
 							validMoves={pieceMoves}
 							onClick={handleSquareClick}
+							onDragStart={handleDragStart}
+							onDrop={handleDrop}
 						/>
 						<LettersPanel />
 					</div>

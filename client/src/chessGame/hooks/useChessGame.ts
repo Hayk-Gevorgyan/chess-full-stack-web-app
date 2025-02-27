@@ -22,8 +22,6 @@ export function useChessGame() {
 
 	const turnMoves = useMemo<MoveWrapper[]>(() => {
 		const moves = getTurnMoves(turn, board)
-		console.log("turn moves")
-		console.table(moves)
 		return moves
 	}, [turn, board])
 
@@ -86,11 +84,9 @@ export function useChessGame() {
 					if (validMove) {
 						//on promotionInfo change PromotionPanel component will call handlePromotionSelect(promotion)
 						if (isPromotion(validMove)) {
-							console.log("isPromotion", validMove)
 							setPromotionInfo(validMove)
 							return
 						} else {
-							console.log("is not promotion", validMove)
 							const move: Move = {
 								from: selectedSquare,
 								to: coordinate,
@@ -103,6 +99,50 @@ export function useChessGame() {
 			}
 		},
 		[gameState, selectedSquare, board, myColor, turnMoves, setSelectedSquare, makeMove]
+	)
+
+	const handleDragStart = useCallback(
+		(coordinate: string) => {
+			if (gameState !== GameState.STARTED) return
+			const piece = getPieceAt(coordinate, board)
+			if (!piece || getPieceColor(piece) !== myColor) return
+			setSelectedSquare(coordinate)
+		},
+		[gameState, board, myColor]
+	)
+
+	const handleDrop = useCallback(
+		(coordinate: string) => {
+			if (!selectedSquare) return
+
+			if (selectedSquare === coordinate) {
+				// Dropping on the same square cancels the move
+				setSelectedSquare(undefined)
+				return
+			}
+
+			const newPiece = getPieceAt(coordinate, board)
+			if (newPiece && getPieceColor(newPiece) === myColor) {
+				// Dropping on your own piece resets selection
+				setSelectedSquare(coordinate)
+				return
+			}
+
+			const selectedPieceType = getPieceType(getPieceAt(selectedSquare, board))
+			const validMove = turnMoves.find((m) => m.from === selectedSquare && m.to === coordinate && m.piece === selectedPieceType)
+
+			if (validMove) {
+				if (isPromotion(validMove)) {
+					setPromotionInfo(validMove)
+					return
+				} else {
+					const move: Move = { from: selectedSquare, to: coordinate }
+					makeMove(move)
+				}
+			}
+			setSelectedSquare(undefined)
+		},
+		[selectedSquare, board, myColor, turnMoves, makeMove]
 	)
 
 	/**
@@ -140,5 +180,7 @@ export function useChessGame() {
 		checkedSquare,
 		handlePromotionSelect,
 		handleSquareClick,
+		handleDragStart,
+		handleDrop,
 	}
 }

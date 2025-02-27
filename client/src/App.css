@@ -18,6 +18,12 @@
 	}
 }
 
+@media (max-width: 468px) {
+	:root {
+		--square-size: 40px;
+	}
+}
+
 body {
 	margin: 0;
 	padding: 0;
@@ -27,15 +33,29 @@ body {
 	background-color: var(--secondary-color);
 }
 
-.game-page-container,
-.home-page-container,
-.auth-page-container {
+.page-container {
 	display: flex;
 	height: 100vh;
 	margin: 0;
 }
 
+.page-content {
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
+	flex-direction: row;
+	margin: 2rem;
+	padding: 2rem;
+	gap: 1rem;
+	border-radius: 1rem;
+	background-color: var(--primary-color);
+	min-width: calc(8 * var(--square-size) + 1rem);
+	width: fit-content;
+}
+
 .content {
+	display: flex;
+	flex-direction: column;
 	margin-left: var(--navbar-width);
 	padding-left: 2rem;
 	width: 100%;
@@ -114,6 +134,11 @@ header {
 	.content {
 		margin-left: 0;
 		padding-left: 0;
+	}
+
+	.page-content {
+		margin: 0;
+		padding: 0;
 	}
 
 	header {

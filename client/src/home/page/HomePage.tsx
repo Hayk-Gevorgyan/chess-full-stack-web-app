@@ -11,15 +11,12 @@ const HomePage = () => {
 
 	return (
 		<>
-			<div className="home-page-container">
+			<div className="page-container">
 				<NavBar />
 				<div className="content">
 					<Header name={username ? username : "no username"} showLogoutButton={true} />
-					<div
-						className="home-content"
-						// style={{ display: "flex", alignItems: "start", justifyContent: "space-evenly", flexDirection: "row" }}
-					>
-						<div className="home-btns">
+					<div className="home-content">
+						<div className="home-btn">
 							<StartGameButton />
 						</div>
 						<ChessBoard
@@ -28,6 +25,8 @@ const HomePage = () => {
 							checkedSquare={undefined}
 							validMoves={[]}
 							onClick={() => {}}
+							onDragStart={() => {}}
+							onDrop={() => {}}
 						/>
 					</div>
 				</div>

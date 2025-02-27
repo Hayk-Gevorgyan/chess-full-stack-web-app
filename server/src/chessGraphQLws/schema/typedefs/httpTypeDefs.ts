@@ -25,7 +25,7 @@ const httpTypeDefs = `#graphql
 
   type Query {
     game(id: ID!): Game
-    endedGames: GamesArray!
+    endedGames(username: String): [Game!]
   }
 
   type Mutation {

@@ -8,14 +8,14 @@ interface ChessBoardProps {
 	checkedSquare: string | undefined
 	validMoves: Move[]
 	onClick: (coordinate: string) => void
+	onDragStart: (coordinate: string) => void
+	onDrop: (coordinate: string) => void
 }
 
-const ChessBoard = ({ board, selectedSquare, checkedSquare, validMoves, onClick }: ChessBoardProps) => {
+const ChessBoard = ({ board, selectedSquare, checkedSquare, validMoves, onClick, onDragStart, onDrop }: ChessBoardProps) => {
 	function isPieceMove(coordinate: string): boolean {
 		if (!selectedSquare) return false
-		return validMoves.some((m) => {
-			return m.from === selectedSquare && m.to === coordinate
-		})
+		return validMoves.some((m) => m.from === selectedSquare && m.to === coordinate)
 	}
 	function renderBoard() {
 		const squares: JSX.Element[] = []
@@ -26,21 +26,22 @@ const ChessBoard = ({ board, selectedSquare, checkedSquare, validMoves, onClick 
 				squares.push(renderSquare(piece, letter, number))
 			}
 		}
-		const boardComponent: JSX.Element = <div className="chessboard">{squares}</div>
-		return boardComponent
+		return <div className="chessboard">{squares}</div>
 	}
 	function renderSquare(pieceType: string, letter: string, number: number) {
 		const coordinate: string = letter + number
 		const isSelected: boolean = pieceType && selectedSquare && selectedSquare === coordinate ? true : false
 		const isAttacked: boolean = pieceType && checkedSquare && checkedSquare === coordinate ? true : false
 		const isValidMove: boolean = isPieceMove(coordinate)
-		const piece = pieceType ? <Piece type={pieceType} /> : undefined
+		const piece = pieceType ? <Piece type={pieceType} coordinate={coordinate} onDragStart={onDragStart} /> : undefined
 		return (
 			<Square
 				key={`${letter}${number}`}
 				letter={letter}
 				number={number}
 				onClick={() => onClick(coordinate)}
+				onDrop={() => onDrop(coordinate)}
+				onDragOver={(e) => e.preventDefault()}
 				isSelected={isSelected}
 				isValidMove={isValidMove}
 				isAttacked={isAttacked}

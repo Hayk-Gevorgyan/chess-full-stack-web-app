@@ -20,16 +20,14 @@ export interface AuthenticatePayload {
 
 const httpResolvers = {
 	Query: {
-		game: (_: any, { id }: { id: string }, context: AuthContext) => {
-			// console.log("game with id", id)
+		game: async (_: any, { id }: { id: string }, context: AuthContext) => {
 			const username = context.user?.username
 			if (!username) return null
-			return gameController.findGameById(id, username)
+			return await gameController.findGameById(id, username)
 		},
-		endedGames: (_: any, __: any, context: AuthContext) => {
-			const username = context.user?.username
+		endedGames: async (_: any, { username: profileUsername }: { username?: string }, context: AuthContext) => {
+			const username = profileUsername ? profileUsername : context.user?.username
 			if (!username) return null
-			// console.log("ended games for", username)
 			return gameController.findAllGamesByUsername(username)
 		},
 	},
@@ -42,7 +40,6 @@ const httpResolvers = {
 			} else {
 				reconnectPayload.username = username
 			}
-			// console.log("reconnecting", username)
 			return gameController.reconnectToGame(reconnectPayload)
 		},
 		signup: async (_: any, { username, password }: { username: string; password: string }): Promise<AuthPayload> => {
@@ -69,14 +66,12 @@ const httpResolvers = {
 			}
 			authPayload.message = "Logout successful"
 			authPayload.username = context.user.username
-			// console.log("disconnecting player from game")
 			gameController.disconnectFromGame(authPayload.username)
 			return authPayload
 		},
 		startGame: (_: any, __: any, context: AuthContext) => {
 			const username = context.user?.username
 			if (!username) return null
-			// console.log("start game for", username)
 			const game = gameController.startGame(username)
 			return game
 		},

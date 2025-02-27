@@ -7,10 +7,11 @@ const ChessGamePage = () => {
 	const { username } = useAuthContext()
 
 	return (
-		<div className="game-page-container">
+		<div className="page-container">
 			<NavBar />
 			<div className="content">
 				<Header name={username ? username : "no username"} showLogoutButton={true} />
+
 				{username ? <ChessGame /> : null}
 			</div>
 		</div>

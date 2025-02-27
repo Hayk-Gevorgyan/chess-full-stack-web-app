@@ -1,7 +1,7 @@
 import { createContext } from "react"
 
 export interface AuthContextProps {
-	username: string | null
+	username?: string
 	loginError: string | null
 	signupError: string | null
 	logoutError: string | null

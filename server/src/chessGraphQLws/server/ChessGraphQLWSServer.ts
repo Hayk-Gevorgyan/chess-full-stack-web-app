@@ -53,7 +53,6 @@ export default class ChessGraphQLWSServer {
 				context: async ({ req, res }: { req: Request; res: Response }) => this.authController.getAuthContext({ req, res }),
 			})
 		)
-		// console.log("connected apollo server to", path)
 	}
 
 	/**
@@ -85,12 +84,10 @@ export default class ChessGraphQLWSServer {
 				},
 				onConnect: async (ctx) => {
 					const { user } = await this.authController.getAuthContext({ connectionParams: ctx.connectionParams })
-					// console.log("Client connected", { user })
 					if (user) this.gameController.reconnectToGame({ username: user.username })
 				},
 				onClose: async (ctx) => {
 					const { user } = await this.authController.getAuthContext({ connectionParams: ctx.connectionParams })
-					// console.log("Client disconnected", ctx.connectionParams)
 					if (user) this.gameController.disconnectFromGame(user.username)
 				},
 			},
@@ -98,7 +95,5 @@ export default class ChessGraphQLWSServer {
 		)
 
 		this.isConnected = true
-
-		// console.log("connected to", path)
 	}
 }

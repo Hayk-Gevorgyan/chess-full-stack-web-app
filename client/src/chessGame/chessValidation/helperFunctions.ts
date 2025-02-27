@@ -60,7 +60,6 @@ export function getPieceColor(piece: string | null): PlayerColor {
 		case "b":
 			return PlayerColor.BLACK
 		default:
-			console.log("default case", piece[1])
 			return PlayerColor.INVALID_COLOR
 	}
 }

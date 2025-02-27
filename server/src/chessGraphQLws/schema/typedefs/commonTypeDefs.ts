@@ -19,10 +19,6 @@ const commonTypeDefs = `#graphql
 	drawOffer: String
   }
 
-  type GamesArray {
-	games: [Game!]
-  }
-
   input MoveInput {
 	from: String!
 	to: String!

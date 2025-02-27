@@ -6,6 +6,7 @@ import NotFound from "./notFound/page/NotFound"
 import "./App.css"
 import AuthProvider from "./shared/providers/AuthProvider"
 import GameProvider from "./shared/providers/GameProvider"
+import ProfilePage from "./profile/page/ProfilePage"
 
 export default function App() {
 	return (
@@ -14,10 +15,9 @@ export default function App() {
 				<GameProvider>
 					<Routes>
 						<Route path="/auth" element={<AuthPage />} />
-
 						<Route path="/" element={<HomePage />} />
 						<Route path="/game" element={<ChessGamePage />} />
-
+						<Route path="/profile/:username" element={<ProfilePage />} />
 						<Route path="*" element={<NotFound />} />
 					</Routes>
 				</GameProvider>

@@ -24,84 +24,84 @@ function useChessApollo<TUpdateData>({
 		offerDraw,
 		acceptDraw,
 		denyDraw,
-		startGameLoading,
-		startGameError,
-		makeMoveLoading,
-		makeMoveError,
-		resignLoading,
-		resignError,
-		offerDrawLoading,
-		offerDrawError,
-		acceptDrawLoading,
-		acceptDrawError,
-		denyDrawLoading,
-		denyDrawError,
+		// startGameLoading,
+		// startGameError,
+		// makeMoveLoading,
+		// makeMoveError,
+		// resignLoading,
+		// resignError,
+		// offerDrawLoading,
+		// offerDrawError,
+		// acceptDrawLoading,
+		// acceptDrawError,
+		// denyDrawLoading,
+		// denyDrawError,
 		makeMoveInput,
 	} = useChessMutations()
 
 	const {
 		data: gameUpdatedData,
-		loading: gameUpdatedLoading,
-		error: gameUpdatedError,
+		// loading: gameUpdatedLoading,
+		// error: gameUpdatedError,
 	} = useSubscription<TUpdateData>(GAME_UPDATED_SUBSCRIPTION, {
 		skip: !isSubscribed,
 	})
 
-	useEffect(() => {
-		if (startGameLoading) {
-			console.log("start game loading")
-		} else if (startGameError) {
-			console.log("start game error", startGameError.message)
-		}
-	}, [startGameLoading, startGameError])
+	// useEffect(() => {
+	// 	if (startGameLoading) {
+	// 		console.log("start game loading")
+	// 	} else if (startGameError) {
+	// 		console.log("start game error", startGameError.message)
+	// 	}
+	// }, [startGameLoading, startGameError])
 
-	useEffect(() => {
-		if (makeMoveLoading) {
-			console.log("make move loading")
-		} else if (makeMoveError) {
-			console.log("make move error", makeMoveError.message)
-		}
-	}, [makeMoveLoading, makeMoveError])
+	// useEffect(() => {
+	// 	if (makeMoveLoading) {
+	// 		console.log("make move loading")
+	// 	} else if (makeMoveError) {
+	// 		console.log("make move error", makeMoveError.message)
+	// 	}
+	// }, [makeMoveLoading, makeMoveError])
 
-	useEffect(() => {
-		if (resignLoading) {
-			console.log("resign loading")
-		} else if (resignError) {
-			console.log("resign error", resignError.message)
-		}
-	}, [resignLoading, resignError])
+	// useEffect(() => {
+	// 	if (resignLoading) {
+	// 		console.log("resign loading")
+	// 	} else if (resignError) {
+	// 		console.log("resign error", resignError.message)
+	// 	}
+	// }, [resignLoading, resignError])
 
-	useEffect(() => {
-		if (offerDrawLoading) {
-			console.log("offer draw loading")
-		} else if (offerDrawError) {
-			console.log("offer draw error", offerDrawError.message)
-		}
-	}, [offerDrawLoading, offerDrawError])
+	// useEffect(() => {
+	// 	if (offerDrawLoading) {
+	// 		console.log("offer draw loading")
+	// 	} else if (offerDrawError) {
+	// 		console.log("offer draw error", offerDrawError.message)
+	// 	}
+	// }, [offerDrawLoading, offerDrawError])
 
-	useEffect(() => {
-		if (acceptDrawLoading) {
-			console.log("accept draw loading")
-		} else if (acceptDrawError) {
-			console.log("accept draw error", acceptDrawError.message)
-		}
-	}, [acceptDrawLoading, acceptDrawError])
+	// useEffect(() => {
+	// 	if (acceptDrawLoading) {
+	// 		console.log("accept draw loading")
+	// 	} else if (acceptDrawError) {
+	// 		console.log("accept draw error", acceptDrawError.message)
+	// 	}
+	// }, [acceptDrawLoading, acceptDrawError])
 
-	useEffect(() => {
-		if (denyDrawLoading) {
-			console.log("accept draw loading")
-		} else if (denyDrawError) {
-			console.log("accept draw error", denyDrawError.message)
-		}
-	}, [denyDrawLoading, denyDrawError])
+	// useEffect(() => {
+	// 	if (denyDrawLoading) {
+	// 		console.log("accept draw loading")
+	// 	} else if (denyDrawError) {
+	// 		console.log("accept draw error", denyDrawError.message)
+	// 	}
+	// }, [denyDrawLoading, denyDrawError])
 
-	useEffect(() => {
-		if (gameUpdatedLoading) {
-			console.log("game updated loading")
-		} else if (gameUpdatedError) {
-			console.log("game updated error", gameUpdatedError.message)
-		}
-	}, [gameUpdatedLoading, gameUpdatedError])
+	// useEffect(() => {
+	// 	if (gameUpdatedLoading) {
+	// 		console.log("game updated loading")
+	// 	} else if (gameUpdatedError) {
+	// 		console.log("game updated error", gameUpdatedError.message)
+	// 	}
+	// }, [gameUpdatedLoading, gameUpdatedError])
 
 	useEffect(() => {
 		if (gameUpdatedData && onGameUpdatedData) {
@@ -127,8 +127,6 @@ function useChessApollo<TUpdateData>({
 						if (response.data?.makeMove) {
 							setToken(response.data.makeMove)
 							response.data.makeMove = undefined
-
-							console.log("token reset")
 						}
 					}
 					return
@@ -139,8 +137,6 @@ function useChessApollo<TUpdateData>({
 						if (response.data?.resign) {
 							setToken(response.data.resign)
 							response.data.resign = undefined
-
-							console.log("token reset")
 						}
 					}
 					return
@@ -151,8 +147,6 @@ function useChessApollo<TUpdateData>({
 						if (response.data?.offerDraw) {
 							setToken(response.data.offerDraw)
 							response.data.offerDraw = undefined
-
-							console.log("token reset")
 						}
 					}
 					return
@@ -163,8 +157,6 @@ function useChessApollo<TUpdateData>({
 						if (response.data?.acceptDraw) {
 							setToken(response.data.acceptDraw)
 							response.data.acceptDraw = undefined
-
-							console.log("token reset")
 						}
 					}
 					return
@@ -175,8 +167,6 @@ function useChessApollo<TUpdateData>({
 						if (response.data?.denyDraw) {
 							setToken(response.data.denyDraw)
 							response.data.denyDraw = undefined
-
-							console.log("token reset")
 						}
 					}
 					return

@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react"
 
-export default function Piece({ type }: { type: string }): JSX.Element {
+interface PieceProps {
+	type: string
+	coordinate: string
+	onDragStart: (coordinate: string) => void
+}
+
+export default function Piece({ type, coordinate, onDragStart }: PieceProps): JSX.Element {
 	const [imgUrl, setImgUrl] = useState("")
 
 	useEffect(() => {
@@ -13,5 +19,9 @@ export default function Piece({ type }: { type: string }): JSX.Element {
 			})
 	}, [type])
 
-	return <div className={`piece ${type}`}>{imgUrl && <img src={imgUrl} alt={type} className="piece-image" />}</div>
+	return (
+		<div className={`piece ${type}`} draggable={true} onDragStart={() => onDragStart(coordinate)}>
+			{imgUrl && <img src={imgUrl} alt={type} className="piece-image" />}
+		</div>
+	)
 }

@@ -1,5 +1,5 @@
 import { MoveWrapper, PieceType } from "../types/types"
-import PieceComponent from "./Piece"
+import Piece from "./Piece"
 import classNames from "classnames"
 import "../styles/PromotionPanel.css"
 import { lnToCoordinates } from "../chessValidation/helperFunctions"
@@ -42,7 +42,7 @@ export default function PromotionPanel({
 		<div className={classNamesPanel} style={promotionPanelStyles}>
 			{pieces.map((piece) => (
 				<div key={piece} className="promotion-option" onClick={() => onSelect(piece)}>
-					<PieceComponent type={piece + promotionInfo?.turn} />
+					<Piece type={piece + promotionInfo?.turn} coordinate="" onDragStart={() => {}} />
 				</div>
 			))}
 		</div>

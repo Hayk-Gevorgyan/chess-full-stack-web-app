@@ -1,7 +1,3 @@
-export function logFunctionCall(functionName: string, args: any[]) {
-	console.log(`Function: ${functionName} | Parameters: ${JSON.stringify(args)}`)
-}
-
 export function logFunctionExecution(fn: Function) {
 	return function (this: any, ...args: any[]) {
 		// Explicitly typing 'this' as 'any'

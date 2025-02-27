@@ -7,12 +7,11 @@ import { GraphQLWsLink } from "@apollo/client/link/subscriptions"
 import { setContext } from "@apollo/client/link/context"
 import { createClient } from "graphql-ws"
 
-const isProduction = false
-// process.env.NODE_ENV === "production"
+const isProduction = process.env.REACT_APP_NODE_ENV === "production"
 
 const localhostUrl = process.env.REACT_APP_LOCALHOST_SERVER_PATH || "http://localhost:56789"
 
-const ngrokUrl = process.env.REACTT_APP_NGROK_SERVER_PATH || "https://8ef9-37-252-72-151.ngrok-free.app"
+const ngrokUrl = process.env.REACT_APP_NGROK_SERVER_PATH || localhostUrl
 
 const graphqlHttpServerPath = process.env.REACT_APP_GRAPHQL_HTTP_SERVER_PATH || "graphql"
 
@@ -22,6 +21,7 @@ const httpUrl = isProduction ? `${ngrokUrl}/${graphqlHttpServerPath}` : `${local
 
 const subscriptionsUrl = isProduction ? `${ngrokUrl}/${graphqlSubscriptionsPath}` : `${localhostUrl}/${graphqlSubscriptionsPath}`
 
+console.log({ isProduction, ngrokUrl, httpUrl, subscriptionsUrl })
 // This authLink adds the current token from localStorage to every request.
 const authLink = setContext((_, { headers }) => {
 	const token = localStorage.getItem("token")

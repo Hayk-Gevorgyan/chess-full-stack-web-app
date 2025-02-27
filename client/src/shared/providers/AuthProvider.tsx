@@ -5,11 +5,12 @@ import useAuthMutations from "../../apollo/user/hooks/useAuthMutations"
 import { useLocalStorage } from "../hooks/useLocalStorage"
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-	const [username, setUsername] = useState<string | null>(null)
+	const [username, setUsername] = useState<string | undefined>()
 	const [loginError, setLoginError] = useState<string | null>(null)
 	const [signupError, setSignupError] = useState<string | null>(null)
 	const [logoutError, setLogoutError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
+	const [authChecked, setAuthChecked] = useState(false)
 	const { setItem: setToken, removeItem: removeToken } = useLocalStorage("token")
 	const serverUrl = "http://localhost:56789"
 	const navigate = useNavigate()
@@ -18,11 +19,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const { loginCallback, signupCallback, logoutCallback, authenticateCallback } = useAuthMutations()
 
 	const authenticate = useCallback(async () => {
-		setUsername(null)
+		setUsername(undefined)
 		setSuccess(null)
 
 		const response = await authenticateCallback()
-
 		const data = response.data
 
 		if (data && data.authenticate) {
@@ -31,11 +31,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			if (error) {
 				console.log(error)
 				removeToken()
+				setAuthChecked(true)
 				return
 			}
-			if (message) {
-				console.log({ message })
-			}
+			// if (message) {
+			// 	console.log({ message })
+			// }
 			if (username) {
 				setUsername(username)
 				setSuccess(message ? message : "Authenticated Successfully")
@@ -46,6 +47,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 				setToken(token)
 			}
 		}
+		setAuthChecked(true)
 	}, [authenticateCallback, removeToken, setToken])
 
 	useEffect(() => {
@@ -53,6 +55,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	}, [authenticate])
 
 	useEffect(() => {
+		// Only perform navigation after the authentication check is complete.
+		if (!authChecked) return
+
 		if (username) {
 			if (location.pathname === "/auth") {
 				navigate("/")
@@ -60,15 +65,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		} else {
 			navigate("/auth")
 		}
-	}, [username, navigate, location.pathname])
+	}, [username, authChecked, navigate, location.pathname])
 
 	const logIn = async (username: string, password: string) => {
-		setUsername(null)
+		setUsername(undefined)
 		setSuccess(null)
 		removeToken()
 
 		const response = await loginCallback({ variables: { username, password } })
-
 		const data = response.data
 
 		if (data) {
@@ -89,12 +93,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	}
 
 	const signUp = async (username: string, password: string) => {
-		setUsername(null)
+		setUsername(undefined)
 		setSuccess(null)
 		removeToken()
 
 		const response = await signupCallback({ variables: { username, password } })
-
 		const data = response.data
 
 		if (data) {
@@ -115,30 +118,24 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	}
 
 	const logOut = async (): Promise<void> => {
-		console.log("logout called")
 		setLoginError(null)
 		setSignupError(null)
 		setSuccess(null)
 		removeToken()
 
 		const response = await logoutCallback()
-
 		const data = response.data
 
 		if (data && data.logout) {
-			console.log(data)
-
 			const { error, message } = data.logout
-
 			if (error) {
 				setLogoutError(error)
 			} else if (message) {
 				console.log(message)
 			}
 		}
-		console.log("logged out")
 		navigate("/auth")
-		setUsername(null)
+		setUsername(undefined)
 		removeToken()
 	}
 

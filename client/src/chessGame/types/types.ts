@@ -54,6 +54,15 @@ export interface Game {
 	state: GameState
 }
 
+export interface ProfileGame {
+	id: string
+	me: string
+	myColor: PlayerColor
+	opponent: string
+	opponentColor: PlayerColor
+	result: GameResult
+}
+
 export interface Move {
 	from: string
 	to: string
@@ -63,6 +72,13 @@ export interface Move {
 export interface MoveWrapper extends Move {
 	turn: PlayerColor
 	piece: PieceType
+}
+
+export enum GameResult {
+	WIN = "win",
+	LOSS = "loss",
+	DRAW = "draw",
+	INVALID_RESULT = "invalid-result",
 }
 
 export type Board = (string | null)[][]
