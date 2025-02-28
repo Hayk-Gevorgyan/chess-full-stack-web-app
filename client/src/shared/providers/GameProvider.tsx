@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { GameContext } from "../contexts/GameContext"
 import { ChessServerEvent, PlayerColor, GameState, Move } from "../../chessGame/types/types"
 import { useAuthContext } from "../hooks/useAuthContext"
 import useChessApollo from "../../apollo/game/hooks/useChessApollo"
+import { useLocation } from "react-router-dom"
 
 export interface GameUpdatedData {
 	gameUpdated: {
@@ -26,6 +27,7 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	const [opponent, setOpponent] = useState<string>("opponent")
 	const [opponentColor, setOpponentColor] = useState<PlayerColor>(PlayerColor.BLACK)
 	const [isSubscribed, setIsSubscribed] = useState<boolean>(false)
+	const location = useLocation()
 
 	const updatePlayers = useCallback(
 		(white: string, black: string) => {
@@ -45,6 +47,12 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 		[username]
 	)
 
+	useEffect(() => {
+		if (!location.pathname.includes("/game")) {
+			setIsSubscribed(false)
+		}
+	}, [location.pathname])
+
 	const handleGraphQLClientEvent = useCallback(
 		(data: GameUpdatedData) => {
 			const { gameUpdated } = data
@@ -60,9 +68,7 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 					setOpponentOfferedDraw(false)
 				}
 				if (state === GameState.BLACK_WIN || state === GameState.DRAW || state === GameState.WHITE_WIN) {
-					setIsSubscribed(() => {
-						return false
-					})
+					setIsSubscribed(false)
 				}
 			}
 		},

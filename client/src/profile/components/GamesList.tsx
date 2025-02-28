@@ -48,6 +48,7 @@ export default function GamesList({ username }: GamesListProps) {
 				{games.map((game) => (
 					<GameCell
 						key={game.id}
+						gameId={game.id}
 						me={game.me}
 						myColor={game.myColor}
 						opponent={game.opponent}

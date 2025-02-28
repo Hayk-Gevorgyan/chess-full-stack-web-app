@@ -105,6 +105,14 @@ body {
 	transition: box-shadow 0.3s ease;
 }
 
+.profile-link:hover {
+	cursor: pointer;
+}
+
+.ended-game-link:hover {
+	cursor: pointer;
+}
+
 .navbar a:hover,
 .common-btn:hover {
 	background-color: var(--deep-blue);
@@ -116,6 +124,7 @@ header {
 	position: sticky;
 	top: 0;
 	height: 10%;
+	min-height: calc(2 * var(--square-size));
 	padding-left: 1rem;
 	padding-right: 1rem;
 	background-color: var(--primary-color);
@@ -143,5 +152,6 @@ header {
 
 	header {
 		position: initial;
+		min-height: var(--sqare-size);
 	}
 }

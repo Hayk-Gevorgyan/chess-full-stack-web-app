@@ -77,15 +77,18 @@
 }
 
 .game-cell .result-draw {
-	background-color: grey;
+	background-color: #d3d3d3;
+	color: black;
 }
 
 .game-cell .result-win {
-	background-color: green;
+	background-color: #90ee90;
+	color: #222222;
 }
 
 .game-cell .result-loss {
-	background-color: red;
+	background-color: #dc143c;
+	color: #ffffff;
 }
 
 @media (max-width: 660px) {

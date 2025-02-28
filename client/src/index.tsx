@@ -7,7 +7,8 @@ import { GraphQLWsLink } from "@apollo/client/link/subscriptions"
 import { setContext } from "@apollo/client/link/context"
 import { createClient } from "graphql-ws"
 
-const isProduction = process.env.REACT_APP_NODE_ENV === "production"
+const isProduction = false
+// process.env.REACT_APP_NODE_ENV === "production"
 
 const localhostUrl = process.env.REACT_APP_LOCALHOST_SERVER_PATH || "http://localhost:56789"
 

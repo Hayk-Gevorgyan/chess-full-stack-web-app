@@ -1,3 +1,4 @@
+import ProfileLink from "../../shared/components/ProfileLink"
 import { PlayerColor } from "../types/types"
 import ColorBlock from "./ColorBlock"
 
@@ -9,7 +10,7 @@ const PlayerBlock = ({ color, username }: PlayerBlockParams) => {
 	return (
 		<div className="player-block">
 			<ColorBlock color={color} />
-			<div className="username">{username}</div>
+			<ProfileLink username={username} classNames="username" />
 		</div>
 	)
 }
