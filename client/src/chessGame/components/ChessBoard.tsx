@@ -4,18 +4,18 @@ import { Move } from "../types/types"
 
 interface ChessBoardProps {
 	board: Array<Array<string>>
-	selectedSquare: string | undefined
-	checkedSquare: string | undefined
-	validMoves: Move[]
-	onClick: (coordinate: string) => void
-	onDragStart: (coordinate: string) => void
-	onDrop: (coordinate: string) => void
+	selectedSquare?: string
+	checkedSquare?: string
+	validMoves?: Move[]
+	onClick?: (coordinate: string) => void
+	onDragStart?: (coordinate: string) => void
+	onDrop?: (coordinate: string) => void
 }
 
 const ChessBoard = ({ board, selectedSquare, checkedSquare, validMoves, onClick, onDragStart, onDrop }: ChessBoardProps) => {
 	function isPieceMove(coordinate: string): boolean {
 		if (!selectedSquare) return false
-		return validMoves.some((m) => m.from === selectedSquare && m.to === coordinate)
+		return validMoves ? validMoves.some((m) => m.from === selectedSquare && m.to === coordinate) : false
 	}
 	function renderBoard() {
 		const squares: JSX.Element[] = []
@@ -33,14 +33,16 @@ const ChessBoard = ({ board, selectedSquare, checkedSquare, validMoves, onClick,
 		const isSelected: boolean = pieceType && selectedSquare && selectedSquare === coordinate ? true : false
 		const isAttacked: boolean = pieceType && checkedSquare && checkedSquare === coordinate ? true : false
 		const isValidMove: boolean = isPieceMove(coordinate)
-		const piece = pieceType ? <Piece type={pieceType} coordinate={coordinate} onDragStart={onDragStart} /> : undefined
+		const piece = pieceType ? (
+			<Piece type={pieceType} coordinate={coordinate} onDragStart={onDragStart ? onDragStart : () => {}} />
+		) : undefined
 		return (
 			<Square
 				key={`${letter}${number}`}
 				letter={letter}
 				number={number}
-				onClick={() => onClick(coordinate)}
-				onDrop={() => onDrop(coordinate)}
+				onClick={onClick ? () => onClick(coordinate) : () => {}}
+				onDrop={onDrop ? () => onDrop(coordinate) : () => {}}
 				onDragOver={(e) => e.preventDefault()}
 				isSelected={isSelected}
 				isValidMove={isValidMove}

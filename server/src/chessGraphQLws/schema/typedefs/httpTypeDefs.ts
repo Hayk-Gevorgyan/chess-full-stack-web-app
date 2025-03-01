@@ -25,6 +25,7 @@ const httpTypeDefs = `#graphql
 
   type Query {
     game(id: ID!): Game
+    endedGame(id: ID!): Game
     endedGames(username: String): [Game!]
   }
 

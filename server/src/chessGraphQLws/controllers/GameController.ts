@@ -31,7 +31,7 @@ export default class GameController {
 	 * @param username - The username of the player.
 	 * @returns The active game if the user is a participant, or the ended game otherwise.
 	 */
-	async findGameById(id: string, username: string) {
+	async findGameByIdAndUsername(id: string, username: string) {
 		const activeGame = await this.gameModel.findActiveGameById(id)
 
 		if (activeGame && (activeGame.white === username || activeGame.black === username)) {
@@ -39,6 +39,10 @@ export default class GameController {
 		} else {
 			return this.gameModel.findEndedGameById(id)
 		}
+	}
+
+	async findEndedGameById(id: string) {
+		return this.gameModel.findEndedGameById(id)
 	}
 
 	/**

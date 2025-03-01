@@ -3,6 +3,7 @@ import { AuthContext } from "../contexts/AuthContext"
 import { useLocation, useNavigate } from "react-router-dom"
 import useAuthMutations from "../../apollo/user/hooks/useAuthMutations"
 import { useLocalStorage } from "../hooks/useLocalStorage"
+import { authPath, homePath } from "../../App"
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const [username, setUsername] = useState<string | undefined>()
@@ -59,11 +60,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		if (!authChecked) return
 
 		if (username) {
-			if (location.pathname === "/auth") {
-				navigate("/")
+			if (location.pathname === authPath) {
+				navigate(homePath)
 			}
 		} else {
-			navigate("/auth")
+			navigate(authPath)
 		}
 	}, [username, authChecked, navigate, location.pathname])
 
@@ -134,7 +135,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 				console.log(message)
 			}
 		}
-		navigate("/auth")
+		navigate(authPath)
 		setUsername(undefined)
 		removeToken()
 	}

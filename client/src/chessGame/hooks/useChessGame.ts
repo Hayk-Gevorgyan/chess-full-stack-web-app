@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect, useCallback } from "react"
-// import useWebsocket from "../../shared/hooks/useWebsocket" // Assuming you have this custom hook
 import { initialBoardSetup, getPieceAt, getPieceColor, getPieceType, immitateFinalBoardAfterMove } from "../chessValidation/helperFunctions"
 import { isCheck, getTurnMoves, isPromotion } from "../chessValidation/chessValidator"
 import { GameState, Move, MoveWrapper, Board, PlayerColor, PieceType } from "../types/types"

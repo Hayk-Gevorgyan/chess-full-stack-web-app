@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useGameContext } from "../hooks/useGameContext"
 import { useNavigate } from "react-router-dom"
+import { chessGamePath } from "../../App"
 
 const StartGameButton = () => {
 	const { startGame } = useGameContext()
@@ -10,7 +11,7 @@ const StartGameButton = () => {
 
 	useEffect(() => {
 		if (startGameClicked) {
-			navigate("/game")
+			navigate(chessGamePath)
 			setStartGameClicked(false)
 		}
 	}, [startGameClicked, navigate, startGame])

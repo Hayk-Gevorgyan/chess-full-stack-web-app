@@ -40,7 +40,7 @@ async function init() {
 		process.exit(1)
 	}
 
-	const chessValidator = new ChessValidator(false)
+	const chessValidator = new ChessValidator(true)
 
 	// Instantiate models
 	const userModel = new UserModel(db)

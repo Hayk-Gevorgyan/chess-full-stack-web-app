@@ -1,4 +1,4 @@
-import React from "react"
+import { profilePath } from "../../App"
 
 const ProfileLink = ({ username, classNames }: { username: string; classNames?: string }) => {
 	return (
@@ -7,7 +7,8 @@ const ProfileLink = ({ username, classNames }: { username: string; classNames?: 
 			title={`go to ${username}'s profile`}
 			onClick={() => {
 				if (username === "username" || username === "opponent") return
-				window.location.href = `/profile/${username}`
+				const path = `${profilePath}/${username}`
+				window.location.href = path
 			}}
 		>
 			{username}

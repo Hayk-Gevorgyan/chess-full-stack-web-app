@@ -14,7 +14,7 @@ export function initialBoardSetup(): Board {
 export function boardAfterMoves(moves: Move[]): Board {
 	let derivedBoard: Board = initialBoardSetup()
 	moves.forEach((move) => {
-		derivedBoard = immitateTestBoardAfterMove(derivedBoard, move)
+		derivedBoard = immitateFinalBoardAfterMove(derivedBoard, move)
 	})
 	return derivedBoard
 }

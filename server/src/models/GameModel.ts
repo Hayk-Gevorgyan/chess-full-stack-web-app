@@ -132,7 +132,10 @@ export default class GameModel implements IGameModel {
 		if (game) {
 			const turnColor = game.moves.length % 2 === 0 ? PlayerColor.WHITE : PlayerColor.BLACK
 			const board = boardAfterMoves(game.moves)
+			console.log("board before move:", move)
+			console.table(board)
 			if (!this.validator.validateMove(board, move)) {
+				console.log("not valid move")
 				return null
 			}
 			const turnPlayer = turnColor === PlayerColor.WHITE ? game.white : game.black

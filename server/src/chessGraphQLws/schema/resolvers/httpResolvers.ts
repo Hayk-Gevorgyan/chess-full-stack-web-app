@@ -23,7 +23,12 @@ const httpResolvers = {
 		game: async (_: any, { id }: { id: string }, context: AuthContext) => {
 			const username = context.user?.username
 			if (!username) return null
-			return await gameController.findGameById(id, username)
+			return await gameController.findGameByIdAndUsername(id, username)
+		},
+		endedGame: async (_: any, { id }: { id: string }, context: AuthContext) => {
+			const username = context.user?.username
+			if (!username) return null
+			return await gameController.findEndedGameById(id)
 		},
 		endedGames: async (_: any, { username: profileUsername }: { username?: string }, context: AuthContext) => {
 			const username = profileUsername ? profileUsername : context.user?.username

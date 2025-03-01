@@ -5,6 +5,7 @@ import Header from "../../shared/components/Header"
 import GamesList from "../components/GamesList"
 import NavBar from "../../shared/components/NavBar"
 import "../styles/ProfilePage.css"
+import { authPath } from "../../App"
 
 export default function ProfilePage() {
 	const { username } = useParams<{ username: string | undefined }>()
@@ -12,7 +13,7 @@ export default function ProfilePage() {
 
 	useEffect(() => {
 		if (!username) {
-			navigate("/auth")
+			navigate(authPath)
 		}
 	}, [username, navigate])
 

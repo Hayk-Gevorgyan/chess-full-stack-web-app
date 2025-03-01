@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useState } from "react"
 import { GameContext } from "../contexts/GameContext"
 import { ChessServerEvent, PlayerColor, GameState, Move } from "../../chessGame/types/types"
 import { useAuthContext } from "../hooks/useAuthContext"
-import useChessApollo from "../../apollo/game/hooks/useChessApollo"
+import useChessApollo from "../../apollo/chessGame/hooks/useChessApollo"
 import { useLocation } from "react-router-dom"
+import { chessGamePath } from "../../App"
 
 export interface GameUpdatedData {
 	gameUpdated: {
@@ -48,7 +49,7 @@ const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	)
 
 	useEffect(() => {
-		if (!location.pathname.includes("/game")) {
+		if (location.pathname !== chessGamePath) {
 			setIsSubscribed(false)
 		}
 	}, [location.pathname])

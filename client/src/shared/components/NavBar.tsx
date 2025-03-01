@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { useAuthContext } from "../hooks/useAuthContext"
+import { authPath, homePath } from "../../App"
 
 const NavBar = () => {
 	const { username } = useAuthContext()
@@ -7,8 +8,8 @@ const NavBar = () => {
 	return (
 		<div className="navbar">
 			<nav>
-				<Link to="/">Home</Link>
-				{username ? <Link to={`/profile/${username}`}>Profile</Link> : <Link to="/auth">Auth</Link>}
+				<Link to={homePath}>Home</Link>
+				{username ? <Link to={`/profile/${username}`}>Profile</Link> : <Link to={authPath}>Auth</Link>}
 			</nav>
 		</div>
 	)
