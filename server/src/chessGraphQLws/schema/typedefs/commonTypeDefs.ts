@@ -2,6 +2,7 @@ const commonTypeDefs = `#graphql
   type User {
 	id: ID!
 	username: String!
+	#state property could be added for in game state management
   }
 
   type Move {
@@ -12,8 +13,8 @@ const commonTypeDefs = `#graphql
 
   type Game {
 	id: ID!
-	white: String!
-	black: String!
+	white: String! #player types could be set to User
+	black: String! #
 	state: String!
 	moves: [Move!]!
 	drawOffer: String
