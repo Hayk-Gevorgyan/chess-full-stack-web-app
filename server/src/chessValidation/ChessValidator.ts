@@ -25,56 +25,12 @@ export default class ChessValidator implements IChessValidator {
 		return this.isLog ? this.isValidMoveWithLogging(board, move) : this.isValidMoveWithoutLogging(board, move)
 	}
 
-	// private isCheck(turn: PlayerColor, board: Board): boolean {
-	// 	return this.isLog ? this.isCheckWithLogging(turn, board) : this.isCheckWithoutLogging(turn, board)
-	// }
-
 	private hasTurnMoves(turn: PlayerColor, board: Board): boolean {
 		return this.isLog ? this.hasTurnMovesWithLogging(turn, board) : this.hasTurnMovesWithoutLogging(turn, board)
 	}
 
 	private getTurnMoves(turn: PlayerColor, board: Board) {
 		return this.isLog ? this.getTurnMovesWithLogging(turn, board) : this.getTurnMovesWithoutLogging(turn, board)
-	}
-
-	private getPawnMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
-		return this.isLog
-			? this.getPawnMovesWithLogging(fromX, fromY, playerColor, board)
-			: this.getPawnMovesWithoutLogging(fromX, fromY, playerColor, board)
-	}
-
-	private getRookMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
-		return this.isLog
-			? this.getRookMovesWithLogging(fromX, fromY, playerColor, board)
-			: this.getRookMovesWithoutLogging(fromX, fromY, playerColor, board)
-	}
-
-	private getKnightMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
-		return this.isLog
-			? this.getKnightMovesWithLogging(fromX, fromY, playerColor, board)
-			: this.getKnightMovesWithoutLogging(fromX, fromY, playerColor, board)
-	}
-
-	private getBishopMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
-		return this.isLog
-			? this.getBishopMovesWithLogging(fromX, fromY, playerColor, board)
-			: this.getBishopMovesWithoutLogging(fromX, fromY, playerColor, board)
-	}
-
-	private getQueenMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
-		return this.isLog
-			? this.getQueenMovesWithLogging(fromX, fromY, playerColor, board)
-			: this.getQueenMovesWithoutLogging(fromX, fromY, playerColor, board)
-	}
-
-	private getKingMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
-		return this.isLog
-			? this.getKingMovesWithLogging(fromX, fromY, playerColor, board)
-			: this.getKingMovesWithoutLogging(fromX, fromY, playerColor, board)
-	}
-
-	private getKingPosition(color: PlayerColor, board: Board): string | undefined {
-		return this.isLog ? this.getKingPositionWithLogging(color, board) : this.getKingPositionWithoutLogging(color, board)
 	}
 
 	private isValidMoveWithoutLogging(board: Board, move: Move): boolean {
@@ -119,22 +75,6 @@ export default class ChessValidator implements IChessValidator {
 	private getTurnMovesWithLogging = logFunctionExecution(this.getTurnMovesWithoutLogging)
 
 	private hasTurnMovesWithLogging = logFunctionExecution(this.hasTurnMovesWithoutLogging)
-
-	private getPawnMovesWithLogging = logFunctionExecution(this.getPawnMovesWithoutLogging)
-
-	private getRookMovesWithLogging = logFunctionExecution(this.getRookMovesWithoutLogging)
-
-	private getKnightMovesWithLogging = logFunctionExecution(this.getKnightMovesWithoutLogging)
-
-	private getBishopMovesWithLogging = logFunctionExecution(this.getBishopMovesWithoutLogging)
-
-	private getQueenMovesWithLogging = logFunctionExecution(this.getQueenMovesWithoutLogging)
-
-	private getKingMovesWithLogging = logFunctionExecution(this.getKingMovesWithoutLogging)
-
-	// private isCheckWithLogging = logFunctionExecution(this.isCheckWithoutLogging)
-
-	private getKingPositionWithLogging = logFunctionExecution(this.getKingPositionWithoutLogging)
 
 	private getTurnMovesWithoutLogging(turn: PlayerColor, board: Board): Move[] {
 		const moves: Move[] = []
@@ -260,7 +200,7 @@ export default class ChessValidator implements IChessValidator {
 		return false
 	}
 
-	private getPawnMovesWithoutLogging(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
+	private getPawnMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
 		const moves: Move[] = []
 
 		if (fromX == null || fromY == null || !playerColor || !board) {
@@ -317,7 +257,7 @@ export default class ChessValidator implements IChessValidator {
 		return moves
 	}
 
-	private getRookMovesWithoutLogging(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
+	private getRookMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
 		const moves: Move[] = []
 
 		if (fromX == null || fromY == null || !playerColor || !board) {
@@ -409,7 +349,7 @@ export default class ChessValidator implements IChessValidator {
 		return moves
 	}
 
-	private getKnightMovesWithoutLogging(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
+	private getKnightMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
 		if (fromX == null || fromY == null || !playerColor || !board) {
 			return []
 		}
@@ -445,7 +385,7 @@ export default class ChessValidator implements IChessValidator {
 		})
 	}
 
-	private getBishopMovesWithoutLogging(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
+	private getBishopMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
 		const moves: Move[] = []
 
 		if (fromX == null || fromY == null || !playerColor || !board) {
@@ -536,11 +476,11 @@ export default class ChessValidator implements IChessValidator {
 		return moves
 	}
 
-	private getQueenMovesWithoutLogging(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
+	private getQueenMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
 		const moves: Move[] = []
 
-		moves.push(...this.getRookMovesWithoutLogging(fromX, fromY, playerColor, board))
-		moves.push(...this.getBishopMovesWithoutLogging(fromX, fromY, playerColor, board))
+		moves.push(...this.getRookMoves(fromX, fromY, playerColor, board))
+		moves.push(...this.getBishopMoves(fromX, fromY, playerColor, board))
 
 		return moves
 	}
@@ -585,7 +525,7 @@ export default class ChessValidator implements IChessValidator {
 		return moves
 	}
 
-	private getKingMovesWithoutLogging(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
+	private getKingMoves(fromX: number, fromY: number, playerColor: PlayerColor, board: Board): Move[] {
 		let moves: any[] = []
 
 		if (fromX == null || fromY == null || !playerColor || !board) {
@@ -747,7 +687,7 @@ export default class ChessValidator implements IChessValidator {
 		return false
 	}
 
-	private getKingPositionWithoutLogging(color: PlayerColor, board: Board): string | undefined {
+	private getKingPosition(color: PlayerColor, board: Board): string | undefined {
 		for (let y = 0; y < 8; y++) {
 			for (let x = 0; x < 8; x++) {
 				const piece = board[y][x]
