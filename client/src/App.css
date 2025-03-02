@@ -105,6 +105,16 @@ body {
 	transition: box-shadow 0.3s ease;
 }
 
+.start-game-btn {
+	width: stretch;
+	margin: 1rem;
+	max-width: calc(7 * var(--square-size));
+}
+
+.logout-btn {
+	max-width: calc(2 * var(--square-size));
+}
+
 .profile-link:hover {
 	cursor: pointer;
 }

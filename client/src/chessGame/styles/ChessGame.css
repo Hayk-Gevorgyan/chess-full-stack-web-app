@@ -115,9 +115,11 @@
 	cursor: pointer;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 468px) {
 	.chess-game-container {
 		margin-left: 0;
 		margin-right: 0;
+		padding-left: 0;
+		padding-right: 0;
 	}
 }

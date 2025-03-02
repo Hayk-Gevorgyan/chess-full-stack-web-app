@@ -11,22 +11,35 @@
 	min-width: calc(8 * var(--square-size) + 1rem);
 }
 
-.home-btn {
+.home-btns-container {
 	display: flex;
 	flex-direction: column;
-	padding: 1rem;
 	text-align: center;
 	border: none;
 	border-radius: 1rem;
 	text-decoration: none;
 	background-color: var(--secondary-color);
 	width: stretch;
-	height: calc(6 * var(--square-size));
-	max-width: calc(3 * var(--square-size));
+	height: calc(8 * var(--square-size));
+	max-width: calc(8 * var(--square-size));
+	align-items: center;
+}
+
+.chessboard-img {
+	border-radius: 1rem;
+	height: calc(8 * var(--square-size));
+	width: calc(8 * var(--square-size));
 }
 
 @media (max-width: 660px) {
 	.home-content {
 		flex-direction: column-reverse;
+		margin: 0;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.home-btns-container {
+		height: fit-content;
 	}
 }

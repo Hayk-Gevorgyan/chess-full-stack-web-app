@@ -1,7 +1,5 @@
 import NavBar from "../../shared/components/NavBar"
 import Header from "../../shared/components/Header"
-import ChessBoard from "../../chessGame/components/ChessBoard"
-import { initialBoardSetup } from "../../chessGame/chessValidation/helperFunctions"
 import StartGameButton from "../../shared/components/StartGameButton"
 import { useAuthContext } from "../../shared/hooks/useAuthContext"
 import "../styles/HomePage.css"
@@ -16,18 +14,10 @@ const HomePage = () => {
 				<div className="content">
 					<Header name={username ? username : "no username"} showLogoutButton={true} />
 					<div className="home-content">
-						<div className="home-btn">
+						<div className="home-btns-container">
 							<StartGameButton />
 						</div>
-						<ChessBoard
-							board={initialBoardSetup()}
-							selectedSquare={undefined}
-							checkedSquare={undefined}
-							validMoves={[]}
-							onClick={() => {}}
-							onDragStart={() => {}}
-							onDrop={() => {}}
-						/>
+						<img className="chessboard-img" src="./chessboard-img.png" alt="chessboard" />
 					</div>
 				</div>
 			</div>
