@@ -1,5 +1,5 @@
 import { IGameModel } from "../../models/GameModel"
-import { Move } from "../../types/types"
+import { Game, Move, PlayerColor } from "../../types/types"
 import pubSub from "../pubsub/pubsub"
 import { AuthenticatePayload } from "../schema/resolvers/httpResolvers"
 
@@ -204,7 +204,7 @@ export default class GameController {
 			username,
 			setTimeout(() => {
 				this.resign(username)
-			}, 6000)
+			}, 60000)
 		)
 	}
 
@@ -216,6 +216,13 @@ export default class GameController {
 		const activeGame = await this.gameModel.findActiveGameByUsername(username)
 		if (activeGame) {
 			this.disconnectPlayer(username)
+			const opponent = this.getOpponent(activeGame, username)
+			if (opponent) {
+				const game = activeGame
+				if (opponent.color === PlayerColor.WHITE) game.black = "disconnected"
+				else if (opponent.color === PlayerColor.BLACK) game.white = "disconnected"
+				pubSub.publish(`${GAME_UPDATED}_${activeGame.id}`, { gameUpdated: game })
+			}
 			return
 		}
 
@@ -223,6 +230,14 @@ export default class GameController {
 		if (waitingGame) {
 			this.gameModel.removeWaitingPlayerByUsername(username)
 			return
+		}
+	}
+
+	getOpponent(game: Game, username: string): { color: PlayerColor; username: string } | undefined {
+		if (game.white === username && game.black) {
+			return { username: game.black, color: PlayerColor.BLACK }
+		} else if (game.black === username && game.white) {
+			return { username: game.white, color: PlayerColor.WHITE }
 		}
 	}
 }
