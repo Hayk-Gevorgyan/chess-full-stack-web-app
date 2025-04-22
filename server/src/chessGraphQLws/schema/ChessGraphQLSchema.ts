@@ -7,3 +7,8 @@ import subscriptionsResolvers from "./resolvers/subscriptionsResolvers"
 export const httpSchema = makeExecutableSchema({ typeDefs: httpTypeDefs, resolvers: httpResolvers })
 
 export const subscriptionsSchema = makeExecutableSchema({ typeDefs: subscriptionsTypeDefs, resolvers: subscriptionsResolvers })
+
+export const allSchema = makeExecutableSchema({
+	typeDefs: httpTypeDefs + subscriptionsTypeDefs,
+	resolvers: { ...httpResolvers, ...subscriptionsResolvers },
+})

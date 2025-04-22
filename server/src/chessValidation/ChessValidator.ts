@@ -7,7 +7,7 @@ import {
 	lnToCoordinates,
 	oppositeColor,
 } from "../utils/helperFunctions/gameHelperFunctions"
-import { logFunctionExecution } from "../utils/helperFunctions/logFunctions"
+// import { logFunctionExecution } from "../utils/helperFunctions/logFunctions"
 
 export interface IChessValidator {
 	validateMove(board: Board, move: Move): boolean
@@ -21,19 +21,7 @@ export default class ChessValidator implements IChessValidator {
 		this.isLog = isLog || false
 	}
 
-	public validateMove(board: Board, move: Move) {
-		return this.isLog ? this.isValidMoveWithLogging(board, move) : this.isValidMoveWithoutLogging(board, move)
-	}
-
-	private hasTurnMoves(turn: PlayerColor, board: Board): boolean {
-		return this.isLog ? this.hasTurnMovesWithLogging(turn, board) : this.hasTurnMovesWithoutLogging(turn, board)
-	}
-
-	private getTurnMoves(turn: PlayerColor, board: Board) {
-		return this.isLog ? this.getTurnMovesWithLogging(turn, board) : this.getTurnMovesWithoutLogging(turn, board)
-	}
-
-	private isValidMoveWithoutLogging(board: Board, move: Move): boolean {
+	validateMove(board: Board, move: Move): boolean {
 		const from = lnToCoordinates(move.from)
 		if (!from) {
 			return false
@@ -70,13 +58,7 @@ export default class ChessValidator implements IChessValidator {
 		return GameState.STARTED
 	}
 
-	private isValidMoveWithLogging = logFunctionExecution(this.isValidMoveWithoutLogging)
-
-	private getTurnMovesWithLogging = logFunctionExecution(this.getTurnMovesWithoutLogging)
-
-	private hasTurnMovesWithLogging = logFunctionExecution(this.hasTurnMovesWithoutLogging)
-
-	private getTurnMovesWithoutLogging(turn: PlayerColor, board: Board): Move[] {
+	private getTurnMoves(turn: PlayerColor, board: Board): Move[] {
 		const moves: Move[] = []
 
 		//collect all not blocked moves and captures
@@ -124,7 +106,7 @@ export default class ChessValidator implements IChessValidator {
 		})
 	}
 
-	private hasTurnMovesWithoutLogging(turn: PlayerColor, board: Board): boolean {
+	private hasTurnMoves(turn: PlayerColor, board: Board): boolean {
 		for (let y = 0; y < 8; y++) {
 			for (let x = 0; x < 8; x++) {
 				const piece = board[y][x]

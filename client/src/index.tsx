@@ -15,7 +15,7 @@ const ngrokUrl = process.env.REACT_APP_NGROK_SERVER_PATH || localhostUrl
 
 const graphqlHttpServerPath = process.env.REACT_APP_GRAPHQL_HTTP_SERVER_PATH || "graphql"
 
-const graphqlSubscriptionsPath = process.env.REACT_APP_GRAPHQL_SUBSCRIPTIONS_SERVER_PATH || "subscriptions"
+const graphqlSubscriptionsPath = process.env.REACT_APP_GRAPHQL_SUBSCRIPTIONS_SERVER_PATH || "graphql"
 
 const httpUrl = isProduction ? `${ngrokUrl}/${graphqlHttpServerPath}` : `${localhostUrl}/${graphqlHttpServerPath}`
 
@@ -81,7 +81,7 @@ const splitLink = split(
 )
 
 const client = new ApolloClient({
-	link: splitLink,
+	link: wsLink,
 	cache: new InMemoryCache(),
 })
 

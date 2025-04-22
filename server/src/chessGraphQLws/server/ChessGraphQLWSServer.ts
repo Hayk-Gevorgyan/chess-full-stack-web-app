@@ -6,7 +6,7 @@ import cors from "cors"
 import { Server } from "http"
 import { WebSocketServer } from "ws"
 import { useServer } from "graphql-ws/lib/use/ws"
-import { httpSchema, subscriptionsSchema } from "../schema/ChessGraphQLSchema"
+import { httpSchema, subscriptionsSchema, allSchema } from "../schema/ChessGraphQLSchema"
 import { GraphQLSchema } from "graphql"
 import AuthController, { AuthContext } from "../controllers/AuthController"
 import GameController from "../controllers/GameController"
@@ -17,15 +17,14 @@ import GameController from "../controllers/GameController"
 export default class ChessGraphQLWSServer {
 	private authController: AuthController
 	private gameController: GameController
-	private httpSchema: GraphQLSchema
-	private subscriptionsSchema: GraphQLSchema
+	private httpSchema: GraphQLSchema = httpSchema
+	private subscriptionsSchema: GraphQLSchema = subscriptionsSchema
+	private allSchema: GraphQLSchema = allSchema
 	private apolloServer: ApolloServer<AuthContext> | undefined
 	private isConnected: boolean = false
 	private wsServer: WebSocketServer | undefined
 
 	constructor(authController: AuthController, gameController: GameController) {
-		this.httpSchema = httpSchema
-		this.subscriptionsSchema = subscriptionsSchema
 		this.gameController = gameController
 		this.authController = authController
 	}
@@ -78,7 +77,7 @@ export default class ChessGraphQLWSServer {
 
 		useServer(
 			{
-				schema: this.subscriptionsSchema,
+				schema: this.allSchema,
 				context: (ctx: any) => {
 					return this.authController.getAuthContext({ connectionParams: ctx.connectionParams })
 				},

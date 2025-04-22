@@ -1,6 +1,6 @@
 import { IGameModel } from "../../models/GameModel"
 import { Game, Move, PlayerColor } from "../../types/types"
-import pubSub from "../pubsub/pubsub"
+import pubSub from "../pubsub"
 import { AuthenticatePayload } from "../schema/resolvers/httpResolvers"
 
 const GAME_UPDATED = "GAME_UPDATED"

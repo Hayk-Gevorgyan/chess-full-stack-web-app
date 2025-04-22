@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 import http from "http"
 import dotenv from "dotenv"
-import connectMongoDb from "./src/mongoClient/mogoClient"
+import connectMongoDb from "./src/mongoClient"
 
 import ChessGraphQLWSServer from "./src/chessGraphQLws/server/ChessGraphQLWSServer"
 import UserModel from "./src/models/UserModel"
@@ -52,8 +52,8 @@ async function init() {
 
 	// Start GraphQL WebSocket Server
 	const gqls = new ChessGraphQLWSServer(authController, gameController)
-	gqls.connect("/subscriptions", server)
-	gqls.connectApolloServer(app)
+	gqls.connect("/graphql", server)
+	// gqls.connectApolloServer(app)
 }
 
 init().catch(console.error)
